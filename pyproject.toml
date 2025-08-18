@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "posawesome"
+description = "POS Awesome"
+version = "15.1.1"
+authors = [
+  { name="Claudion.com", email="support@claudion.com" }
+]
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+  "frappe>=15.0.0"
+]
+license = "MIT"
+
+[tool.setuptools.packages.find]
+include = ["posawesome", "wiki_images"]

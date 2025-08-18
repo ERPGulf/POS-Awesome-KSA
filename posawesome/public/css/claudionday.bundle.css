@@ -1,0 +1,1288 @@
+@font-face {
+  font-family: "Host Grotesk";
+  src: url("/assets/posawesome/fonts/HostGrotesk-Regular.ttf")
+    format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+[data-theme="claudionday"] .v-toolbar.v-app-bar {
+  background: #073C44;
+  width: 1440px;
+  height: 44px;
+
+  display: flex;
+  justify-content: space-between;
+
+  padding-top: 6px;
+  padding-right: 32px;
+  padding-bottom: 6px;
+  padding-left: 32px;
+}
+
+
+[data-theme="claudionday"] .v-toolbar-title.text-primary {
+  width: 96px !important;
+  height: 17px !important;
+
+  font-family: "Host Grotesk", sans-serif !important;
+  font-weight: 400 !important;
+  font-size: 14px !important;
+  line-height: 120% !important;
+  letter-spacing: 0px !important;
+
+  color: #FFFFFF !important;
+
+  display: flex !important;
+  align-items: center !important;
+}
+
+[data-theme="claudionday"] button.v-btn[aria-haspopup="menu"] {
+  /* width: 52px !important;
+  height: 32px !important; */
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+
+  padding-top: 6px !important;
+  padding-right: 8px !important;
+  padding-bottom: 6px !important;
+  padding-left: 8px !important;
+
+  border-radius: 6px !important;
+}
+
+
+[data-theme="claudionday"] button.v-btn[aria-haspopup="menu"] .v-btn__content {
+  font-family: "Host Grotesk", sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  line-height: 120% !important;
+  letter-spacing: 0px !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+
+  text-transform: none !important; 
+  color: #FFFFFF !important;
+}
+
+
+[data-theme="claudionday"] .v-toolbar__content > button.v-btn:nth-of-type(2)
+{
+/* width: 109px !important;
+  height: 24px !important; */
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center!important;
+  gap: 4px !important;
+}
+
+[data-theme="claudionday"] .v-toolbar__content > button.v-btn:nth-of-type(2) .v-btn__content{
+font-family: "Host Grotesk", sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 120%;
+  letter-spacing: 0px;
+  text-align: center;
+  vertical-align: middle;
+  color: #FFFFFF;
+
+  /* width: 81px;
+  height: 14px; */
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+    text-transform: none !important; 
+    gap:4px;
+
+}
+
+[data-theme="claudionday"] .v-toolbar__content > button.v-btn:nth-of-type(2) .v-btn__content::before {
+  content: "";
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background-image: url("/assets/posawesome/assets/Shop.svg")!important;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+}
+
+
+[data-theme="claudionday"] .v-toolbar__content > button.v-btn:nth-of-type(3) {
+  /* width: 54px !important;
+  height: 24px !important; */
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center!important;
+  gap: 4px !important;
+}
+
+[data-theme="claudionday"] .v-toolbar__content > button.v-btn:nth-of-type(3) .v-btn__content
+{
+  /* width: 26px;
+  height: 14px; */
+
+  font-family: "Host Grotesk", sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 120%;
+  letter-spacing: 0px;
+
+  text-align: center;
+  vertical-align: middle;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color:#FFFFFF !important;
+  gap: 4px;
+  text-transform: none !important; 
+
+}
+
+
+[data-theme="claudionday"] .v-toolbar__content > button.v-btn:nth-of-type(3) .v-btn__content::before {
+  content: "" !important;
+  display: inline-block !important;
+  width: 24px !important;
+  height: 24px !important;
+  background-image: url("/assets/posawesome/assets/Avatar.svg") !important;
+  background-repeat: no-repeat !important;
+  background-size: contain !important;
+  background-position: center !important;
+}
+
+[data-theme="claudionday"] i.mdi-menu.v-icon.v-icon--size-default {
+  color: #FFFFFF !important;
+  stroke:#FFFFFF !important;
+}
+
+/* [data-theme="claudionday"] img.v-img__img.v-img__img--contain */
+[data-theme="claudionday"] .v-responsive.v-img.bg-primary
+{
+  width: 24px !important;
+  height: 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  background-color: none !important;
+    line-height: 120% !important;
+
+}
+
+/*******************BUTTONS*******************/
+
+[data-theme="claudionday"] button.v-btn[value="list"] {
+  width: 46px !important;
+  height: 37px !important;
+
+  padding-top: 10px !important;
+  padding-right: 12px !important;
+  padding-bottom: 10px !important;
+  padding-left: 12px !important;
+
+  border-top-left-radius: 6px !important;
+  border-bottom-left-radius: 6px !important;
+
+  background: #073C44 !important;
+  color: #FFFFFF !important;
+}
+
+
+[data-theme="claudionday"] button.v-btn[value="list"] .v-btn__content {
+  width: 22px !important;
+  height: 17px !important;
+
+  font-family: "Host Grotesk", sans-serif !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  line-height: 120% !important;
+  letter-spacing: 0px !important;
+
+  vertical-align: middle !important;
+  color: #FFFFFF !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+    text-transform: none !important; 
+
+}
+
+[data-theme="claudionday"] button.v-btn[value="card"] {
+  width: 55px !important;
+  height: 37px !important;
+
+  padding-top: 10px !important;
+  padding-right: 12px !important;
+  padding-bottom: 10px !important;
+  padding-left: 12px !important;
+
+  border-top-right-radius: 6px !important;
+  border-bottom-right-radius: 6px !important;
+
+  background: #E2EBEB !important;
+  animation-duration: 0ms !important;
+}
+
+[data-theme="claudionday"] button.v-btn[value="card"] .v-btn__content {
+  width: 31px !important;
+  height: 17px !important;
+
+  font-family: "Host Grotesk", sans-serif !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  line-height: 120% !important;
+  letter-spacing: 0px !important;
+
+  vertical-align: middle !important;
+  color: #151616 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+    text-transform: none !important; 
+
+}
+
+[data-theme="claudionday"] button.v-btn.bg-warning {
+  width: 125px !important;
+  height: 36px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+
+  padding-top: 8px !important;
+  padding-right: 12px !important;
+  padding-bottom: 8px !important;
+  padding-left: 12px !important;
+
+  border-radius: 6px !important;
+  border: 1px solid #FFB455 !important;
+  background: #FFB455 !important;
+}
+
+
+[data-theme="claudionday"] button.v-btn.bg-warning .v-btn__content {
+  width: 44px !important;
+  height: 17px !important;
+
+  font-family: "Host Grotesk", sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  line-height: 120% !important;
+  letter-spacing: 0px !important;
+
+  text-align: center !important;
+  vertical-align: middle !important;
+  color: #151616 !important;
+  text-transform: none !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+[data-theme="claudionday"] button.v-btn.bg-accent {
+  width: 158.5px !important;
+  height: 36px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+
+  padding-top: 8px !important;
+  padding-right: 12px !important;
+  padding-bottom: 8px !important;
+  padding-left: 12px !important;
+
+  border-radius: 6px !important;
+  background: #51C784 !important;
+  border: 1px solid #51C784 !important;
+}
+[data-theme="claudionday"] button.v-btn.bg-accent .v-btn__content {
+  width: 97px !important;
+  height: 17px !important;
+
+  font-family: "Host Grotesk", sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  line-height: 120% !important;
+  letter-spacing: 0px !important;
+
+  text-align: center !important;
+  vertical-align: middle !important;
+  color: #151616 !important;
+  text-transform: none !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+
+[data-theme="claudionday"] button.v-btn.bg-error {
+  width: 158.5px !important;
+  height: 36px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+
+  padding-top: 8px !important;
+  padding-right: 12px !important;
+  padding-bottom: 8px !important;
+  padding-left: 12px !important;
+
+  border-radius: 6px !important;
+  background: #FF7A55 !important;
+  border: 1px solid #FF7A55 !important;
+}
+
+[data-theme="claudionday"] button.v-btn.bg-error .v-btn__content {
+  width: 75px !important;
+  height: 17px !important;
+
+  font-family: "Host Grotesk", sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  line-height: 120% !important;
+  letter-spacing: 0px !important;
+
+  text-align: center !important;
+  vertical-align: middle !important;
+  color: #151616 !important;
+  text-transform: none !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+
+[data-theme="claudionday"] button.v-btn.text-error.v-btn--slim {
+  width: 55px !important;
+  height: 36px !important;
+  gap: 10px !important;
+  padding-top: 8px !important;
+  padding-right: 12px !important;
+  padding-bottom: 8px !important;
+  padding-left: 12px !important;
+  border-radius: 6px !important;
+  border: 1px solid #073C44 !important;
+  text-transform: none !important;
+}
+
+[data-theme="claudionday"] button.v-btn.text-error.v-btn--slim .v-btn__content {
+  width: 31px !important;
+  height: 14px !important;
+  font-family: "Host Grotesk", sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  line-height: 120% !important;
+  letter-spacing: 0px !important;
+  color: #073C44 !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+[data-theme="claudionday"] button.v-btn.v-btn--slim.text-primary
+{
+width: 63px !important;
+  height: 36px !important;
+  gap: 8px !important;
+  padding-top: 8px !important;
+  padding-right: 12px !important;
+  padding-bottom: 8px !important;
+  padding-left: 12px !important;
+  border: 1px solid #073C44 !important;
+  border-radius: 6px !important;
+  background: #073C44 !important;
+  text-transform: none !important;}
+
+  [data-theme="claudionday"] button.v-btn.v-btn--slim.text-primary .v-btn__content {
+  width: 39px !important;
+  height: 14px !important;
+  font-family: "Host Grotesk", sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  line-height: 120% !important;
+  letter-spacing: 0px !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  color: #FFFFFF !important;
+  text-transform: none !important;
+}
+[data-theme="claudionday"] button.btn.btn-modal-primary {
+ border: 1px solid #073C44 !important;
+  border-radius: 6px !important;
+  background: #073C44 !important;
+}
+[data-theme="claudionday"] button.v-btn.bg-success {
+  background: #073C44 !important;
+    border-radius: 6px !important;
+ border: 1px solid #073C44 !important;}
+
+
+ [data-theme="claudionday"] button.v-btn.text-success {
+  width: 76px !important;
+  height: 36px !important;
+  gap: 8px !important;
+  padding: 8px 12px !important;
+  border-radius: 6px !important;
+  border-width: var(--borderWidth-button-dense, 1px) !important;
+  background: #073C44 !important;
+  border: 1px solid #073C44 !important;
+  text-transform: none !important;
+}
+[data-theme="claudionday"] button.v-btn.text-success .v-btn__content {
+  font-family: "Host Grotesk", sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  line-height: 120% !important;
+  letter-spacing: 0px !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  color: #FFFFFF !important;
+  text-transform: none !important;
+}
+
+[data-theme="claudionday"] .v-btn.bg-primary 
+
+{
+gap: 8px !important;
+  padding-top: 8px !important;
+  padding-right: 12px !important;
+  padding-bottom: 8px !important;
+  padding-left: 12px !important;
+  /* border: 1px solid #073C44 !important; */
+  border-radius: 6px !important;
+  /* background: #073C44 !important; */
+  text-transform: none !important;}
+
+  [data-theme="claudionday"] 
+.v-btn.bg-primary .v-btn__content {font-family: "Host Grotesk", sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  line-height: 120% !important;
+  letter-spacing: 0px !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  color: #FFFFFF !important;
+  text-transform: none !important;
+
+}
+
+[data-theme="claudionday"] 
+.v-btn.bg-success.v-btn--size-large {
+gap: 8px !important;
+  padding-top: 8px !important;
+  padding-right: 12px !important;
+  padding-bottom: 8px !important;
+  padding-left: 12px !important;
+  /* border: 1px solid #073C44 !important; */
+  border-radius: 6px !important;
+  /* background: #073C44 !important; */
+  text-transform: none !important;}
+
+
+  [data-theme="claudionday"] 
+.v-btn.bg-success.v-btn--size-large .v-btn__content{font-family: "Host Grotesk", sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  line-height: 120% !important;
+  letter-spacing: 0px !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  text-transform: none !important;
+
+}
+
+[data-theme="claudionday"] .v-btn.bg-secondary {
+  width: 158.5px !important;
+  height: 36px !important;
+  gap: 10px !important;
+  opacity: 1 !important;
+  padding: 8px 12px !important;
+  border-radius: 6px !important;
+  border: 1px solid #5BD9E1 !important;
+  background: #5BD9E1 !important;
+  animation-duration: 0ms !important; 
+}
+[data-theme="claudionday"] .v-btn.bg-secondary .v-btn__content {
+  width: 80px !important;
+  height: 17px !important;
+  opacity: 1 !important;
+  font-family: "Host Grotesk", sans-serif !important;
+  font-weight: 600 !important;
+  font-style: normal !important; 
+  font-size: 14px !important;
+  line-height: 120% !important;
+  letter-spacing: 0px !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  color: #151616 !important;
+  text-transform: none !important;
+}
+
+[data-theme="claudionday"] .v-btn.text-primary.ml-2 {
+  width: 62px !important;
+  height: 36px !important;
+  gap: 8px !important;
+  opacity: 1 !important;
+  padding: 8px 12px !important;
+  border-radius: 6px !important;
+  border: 1px solid #073C44 !important;
+  background: #073C44 !important;
+}
+[data-theme="claudionday"] .v-btn.text-primary.ml-2 .v-btn__content {
+  width: 38px !important;
+  height: 14px !important;
+  opacity: 1 !important;
+  font-family: "Host Grotesk", sans-serif !important;
+  font-weight: 600 !important; /* SemiBold */
+  font-style: normal !important;
+  font-size: 12px !important;
+  line-height: 120% !important;
+  letter-spacing: 0px !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  color: #FFFFFF !important;
+  text-transform: none !important;
+}
+
+
+
+/* [data-theme="claudionday"] button.v-btn.v-btn--block.v-theme--light.text-primary.v-btn--density-default.v-btn--size-small.v-btn--variant-text
+{
+  background-color: red !important;
+} */
+/* 
+[data-theme="claudionday"] .v-btn.v-btn--block.text-primary.v-btn--variant-text:nth-of-type(1) {
+background-color: pink;}
+
+[data-theme="claudionday"] .v-btn.v-btn--block.text-primary.v-btn--variant-text:nth-of-type(2) {
+background-color: lightskyblue;} */
+
+/* 
+[data-theme="claudionday"] button.v-btn.text-primary {
+  width: 125px !important;
+  height: 36px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+
+  padding-top: 8px !important;
+  padding-right: 12px !important;
+  padding-bottom: 8px !important;
+  padding-left: 12px !important;
+
+  border-radius: 6px !important;
+  border: 1px solid #073C44 !important;
+  background: transparent !important;
+}
+
+[data-theme="claudionday"] button.v-btn.text-primary .v-btn__content {
+  width: 61px !important;
+  height: 14px !important;
+
+  font-family: "Host Grotesk", sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  line-height: 120% !important;
+  letter-spacing: 0px !important;
+
+  text-align: center !important;
+  vertical-align: middle !important;
+  color: #073C44 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+} */
+
+
+
+
+/****************************** TABLE 2 *******************************************************/
+
+
+[data-theme="claudionday"] .v-data-table.elevation-1 {
+  /* width: 722px !important; */
+  /* height: 470px !important; */
+
+  border-radius: 8px !important;
+  background: #FFFFFF !important;
+  border: 1px solid #A7A8A8 !important;
+
+  overflow: hidden !important;
+}
+
+
+[data-theme="claudionday"] .v-data-table-rows-no-data td {
+  position: relative !important;
+  /* height: 470px !important;  */
+  padding: 0 !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  font-family: "Host Grotesk", sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  color: black !important;
+}
+[data-theme="claudionday"] .v-data-table-rows-no-data td::before {
+  content: "";
+  display: block;
+  width: 64px;
+  height: 64px;
+
+  background-image: url("/assets/posawesome/assets/Group.svg");
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+
+  margin: 0 auto 4px auto; 
+}
+
+
+
+/* 1. Target only the specific red icon button with elevation */
+[data-theme="claudionday"] .v-btn.v-btn--icon.v-btn--elevated.bg-error {
+  background-color: transparent !important;  
+  box-shadow: none !important;               
+  padding: 0 !important;    
+  outline: none !important;
+  border: none !important;                 
+}
+
+/* 2. Remove the original icon (delete icon) */
+[data-theme="claudionday"] .v-btn.v-btn--icon.v-btn--elevated.bg-error .v-btn__content i.mdi-delete {
+  display: none !important;
+}
+
+/* 3. Inject custom SVG icon */
+[data-theme="claudionday"] .v-btn.v-btn--icon.v-btn--elevated.bg-error .v-btn__content::after {
+  content: "" !important;
+  width: 40px !important;
+  height: 40px !important;
+  background-image: url("/assets/posawesome/assets/Frame 2147226799.svg") !important;
+  background-repeat: no-repeat !important;
+  background-size: contain !important;
+  background-position: center !important;
+  display: inline-block !important;
+}
+
+/* Reset styling and remove background/shadow */
+[data-theme="claudionday"] .v-btn.v-btn--icon.v-btn--elevated.bg-secondary .v-btn__content i.mdi-minus-circle-outline {
+  display: none !important;
+}
+
+[data-theme="claudionday"] .v-btn.v-btn--icon.v-btn--elevated.bg-secondary:has(i.mdi-minus-circle-outline) {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  outline: none !important;
+  border: none !important;
+  /* width: 36px !important;
+  height: 36px !important; */
+}
+
+[data-theme="claudionday"] .v-btn.v-btn--icon.v-btn--elevated.bg-secondary:has(i.mdi-minus-circle-outline) .v-btn__content::after {
+  content: "" !important;
+  width: 40px !important;
+  height: 40px !important;
+  background-image: url("/assets/posawesome/assets/minus.svg") !important;
+  background-repeat: no-repeat !important;
+  background-size: contain !important;
+  background-position: center !important;
+  display: inline-block !important;
+}
+
+/* Reset styling and remove background/shadow */
+[data-theme="claudionday"] .v-btn.v-btn--icon.v-btn--elevated.bg-secondary .v-btn__content i.mdi-plus-circle-outline {
+  display: none !important;
+}
+
+[data-theme="claudionday"] .v-btn.v-btn--icon.v-btn--elevated.bg-secondary:has(i.mdi-plus-circle-outline) {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  outline: none !important;
+  border: none !important;
+  /* width: 36px !important;
+  height: 36px !important; */
+}
+
+[data-theme="claudionday"] .v-btn.v-btn--icon.v-btn--elevated.bg-secondary:has(i.mdi-plus-circle-outline) .v-btn__content::after {
+  content: "" !important;
+  width: 40px !important;
+  height: 40px !important;
+  background-image: url("/assets/posawesome/assets/plus.svg") !important;
+  background-repeat: no-repeat !important;
+  background-size: contain !important;
+  background-position: center !important;
+  display: inline-block !important;
+}
+
+
+/*******nnnnnnnnnnbbb**********/
+
+[data-theme="claudionday"] .v-card.bg-grey-lighten-5 {
+  background-color: #FFFFFF !important;
+}
+
+[data-theme="claudionday"] i.mdi-plus.v-icon {
+  font-size: 0 !important;
+  width: 36px !important;
+  height: 36px !important;
+  background-image: url("/assets/posawesome/assets/Button.svg") !important;
+  background-repeat: no-repeat !important;
+  background-size: contain !important;
+  background-position: center !important;
+  display: inline-block !important;
+}
+
+
+
+/**********************************SIDEBAR**********************************************/
+/* [data-theme="claudionday"] .v-navigation-drawer__content {
+  background-color: #FFFFFF !important;
+} */
+[data-theme="claudionday"] .v-navigation-drawer__content {
+  width: 196px !important;
+  height: 1031px !important;
+  /* gap: 10px !important;
+  transform: rotate(0deg) !important;
+  opacity: 1 !important; */
+
+  padding-top: 24px !important;
+  padding-right: 16px !important;
+  padding-bottom: 24px !important;
+  padding-left: 24px !important;
+
+  border-right: 1px solid #A7A8A8 !important;
+
+  background-color: #FFFFFF !important;
+}
+
+
+
+[data-theme="claudionday"] .v-list-item {
+  /* width: 28px !important;
+  height: 17px !important; */
+  /* transform: rotate(0deg) !important; 
+  opacity: 1 !important;  */
+  
+  font-family: "Host Grotesk", sans-serif !important;
+  font-weight: 400 !important;
+  /* font-style: normal !important;  */
+  font-size: 14px !important;
+  line-height: 120% !important; 
+  letter-spacing: 0 !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="claudionday"] .v-list-item .v-icon {
+  display: none !important;
+}
+
+[data-theme="claudionday"] .v-list-item__prepend {
+  background-image: url('/assets/posawesome/assets/imac-computer-logo.svg') !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: contain !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+
+[data-theme="claudionday"] .v-navigation-drawer__content .v-list-item--link		  {
+
+  background-color: #44C0A5 !important;
+  width: 156px !important;
+  height: 20px !important;
+  gap: 10px !important;
+  border-radius: 6px !important;
+  padding-top: 4px !important;
+  padding-right: 12px !important;
+  padding-bottom: 4px !important;
+  padding-left: 12px !important;
+  color: white !important;
+}
+
+
+[data-theme="claudionday"] 
+.v-navigation-drawer__content 
+.v-list-item 
+.v-btn 
+.v-btn__content .v-icon.mdi-network-pos {
+  display: none !important;
+}
+
+[data-theme="claudionday"] 
+.v-navigation-drawer__content 
+.v-list-item 
+.v-btn 
+.v-btn__content {
+  background-image: url('/assets/posawesome/assets/arrow.svg') !important;
+  background-repeat: no-repeat !important;
+  /* background-position: center !important; */
+  background-size: contain !important;
+  width: 16px !important;
+  height: 24px !important ;
+  display: inline-block !important;
+}
+
+/* Hide only the ERPNext logo image */
+[data-theme="claudionday"] .v-img.v-responsive .v-img__img[src*="erpnext-logo.svg"] {
+  display: none !important;
+}
+
+/* Add background only to the .v-img element that contains ERPNext logo */
+[data-theme="claudionday"] .v-img.v-responsive:has(.v-img__img[src*="erpnext-logo.svg"]) {
+  background-image: url('/assets/posawesome/assets/erp.svg') !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: contain !important;
+
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 5px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+
+
+
+/* [data-theme="claudionday"] .v-list-item-title { */
+[data-theme="claudionday"] .v-list-item__content .v-list-item-title:not(:has(div)) {
+  /* width: 93px;
+  height: 24px; */
+  font-family: "Host Grotesk", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+  /* font-size: 20px;
+  line-height: 120%; */
+  letter-spacing: 0;
+  color: #020D0F;
+
+}
+
+[data-theme="claudionday"] .headline.indigo--text {
+  width: 540px !important;
+  height: 18px !important;
+  font-family: "Host Grotesk", sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 16px !important;
+  line-height: 115% !important; 
+  letter-spacing: 0% !important;
+  color: #131415 !important;
+  display: inline-block !important; 
+}
+
+[data-theme="claudionday"] label.v-label.v-field-label[for="input-67"] {
+  width: 103px !important;
+  height: 17px !important;
+  opacity: 0.5 !important;
+  font-family: "Host Grotesk", sans-serif !important;
+  font-weight: 400 !important; 
+  font-size: 14px !important;
+  line-height: 120% !important;
+  letter-spacing: 0px !important;
+  color: #171717 !important;
+  display: inline-block !important; }
+
+[data-theme="claudionday"] .v-data-table thead th.v-data-table__th {
+  background-color:  #E3E5E5
+ !important;
+}
+
+
+[data-theme="claudionday"] .modal-header .modal-title {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  /* width: 99px !important; */
+  /* height: 21px !important; */
+  font-family: "Host Grotesk", sans-serif !important;
+  font-weight: 600 !important;
+  /* font-size: 18px !important;
+  line-height: 115% !important; */
+  letter-spacing: 0 !important;
+  color: #131415 !important;
+  margin: 0; /* reset default h4 margin */
+}
+[data-theme="claudionday"] .modal-header .modal-title::before {
+  content: "" !important;
+  display: inline-block !important;
+  width: 20px !important;
+  height: 20px !important;
+  background-image: url("/assets/posawesome/assets/documents-file-warning-error.svg") !important; 
+  background-repeat: no-repeat !important;
+  background-size: contain !important;
+  background-position: center !important;
+  flex-shrink: 0;
+}
+
+[data-theme="claudionday"] .modal-body.ui-front {
+  font-family: "Host Grotesk", sans-serif !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  line-height: 150% !important;
+  letter-spacing: 0 !important;
+  color: #151616 !important;
+  padding: 16px !important; 
+  border-radius: 4px; 
+}
+
+[data-theme="claudionday"] .v-card-title .text-h5.text-primary {
+  width: 540px !important;
+  height: 21px !important;
+  font-family: "Host Grotesk", sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 18px !important;
+  line-height: 115% !important; 
+  letter-spacing: 0% !important;
+  color: #131415 !important;
+}
+[data-theme="claudionday"] .v-card-subtitle .text-primary {
+  width: 540px !important;
+  height: 15px !important;
+  font-family: "Host Grotesk", sans-serif !important;
+  font-weight: 400 !important;
+  font-size: 13px !important;
+  line-height: 115% !important; 
+  letter-spacing: 0 !important;
+  color: #131415 !important;
+}
+
+/* [data-theme="claudionday"] .v-pagination__first .v-icon,
+[data-theme="claudionday"] .v-pagination__prev .v-icon,
+[data-theme="claudionday"] .v-pagination__next .v-icon,
+[data-theme="claudionday"] .v-pagination__last .v-icon {
+  color: green !important;
+  --v-icon-color: green !important; 
+} */
+
+
+/*********************INPUT**************************** */
+/* 
+[data-theme="claudionday"] .v-overlay-container .v-overlay__content .v-field {
+  all: unset;
+  width: 100%;
+  height: 36px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #A7A8A8;
+  background-color: #FFFFFF;
+  opacity: 1;
+  box-sizing: border-box;
+  font-size: 14px;
+  line-height: 20px;
+  display: flex;
+  align-items: center;
+}
+
+[data-theme="claudionday"] .v-overlay-container .v-overlay__content input,
+[data-theme="claudionday"] .v-overlay-container .v-overlay__content textarea,
+[data-theme="claudionday"] .v-overlay-container .v-overlay__content .v-field__input,
+[data-theme="claudionday"] .v-overlay-container .v-overlay__content .v-select__selection-text {
+  all: unset;
+  width: 100%;
+  font-size: inherit;
+  line-height: inherit;
+  background: transparent;
+}
+
+[data-theme="claudionday"] .v-overlay-container .v-overlay__content .v-field__outline,
+[data-theme="claudionday"] .v-overlay-container .v-overlay__content .v-progress-linear,
+[data-theme="claudionday"] .v-overlay-container .v-overlay__content .v-field__loader,
+[data-theme="claudionday"] .v-overlay-container .v-overlay__content .v-field__overlay 
+{
+  display: none !important;
+}
+
+
+[data-theme="claudionday"] .v-selection-control__input input[type="checkbox"] {
+  width: 16px !important;
+  height: 16px !important;
+  border-radius: 4px !important; 
+  vertical-align: middle;
+}
+
+[data-theme="claudionday"] .v-selection-control__input i {
+  font-size: 16px !important; 
+  width: 16px !important;
+  height: 16px !important;
+  margin-right: 4px !important; 
+  vertical-align: middle;
+}
+
+[data-theme="claudionday"] label.v-label.v-label--clickable[for="checkbox-90"] {
+  font-family: "Host Grotesk", sans-serif !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  font-size: 12px !important;
+  line-height: 120% !important;
+  color: #020D0F !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: inline-block !important;
+  width: 100% !important;
+  height: 14px !important;
+  vertical-align: middle;
+}
+
+[data-theme="claudionday"] .v-selection-control__wrapper {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important; 
+}
+
+
+[data-theme="claudionday"] .v-field__field .v-field-label--floating {
+  transform: none !important;
+  top: 0 !important;
+  left: 0 !important;
+  font-size: 14px !important;
+  line-height: 120% !important;
+  opacity: 0.5 !important;
+  font-family: "Host Grotesk", sans-serif !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  color: #171717 !important;
+  height: 17px !important;
+  letter-spacing: 0px !important;
+  position: absolute !important;
+  pointer-events: none !important;
+}
+
+
+[data-theme="claudionday"] .v-field__field .v-field-label {
+  font-size: 14px !important;
+  line-height: 120% !important;
+  opacity: 0.5 !important;
+  font-family: "Host Grotesk", sans-serif !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  color: #171717 !important;
+  height: 17px !important;
+  letter-spacing: 0px !important;
+  top: 0 !important;
+  left: 0 !important;
+  transform: none !important;
+  position: absolute !important;
+  pointer-events: none !important;
+}
+
+  */
+
+
+
+[data-theme="claudionday"] .v-field__field .v-field-label {
+  font-size: 14px !important;
+  line-height: 120% !important;
+  opacity: 0.5 !important;
+  font-family: "Host Grotesk", sans-serif !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  color: #171717 !important;
+  height: 17px !important;
+  letter-spacing: 0px !important;
+  top: 0 !important;
+  left: 0 !important;
+  transform: none !important;
+  position: absolute !important;
+  pointer-events: none !important;
+}
+
+
+[data-theme="claudionday"] .v-selection-control__input input[type="checkbox"] {
+  width: 16px !important;
+  height: 16px !important;
+  border-radius: 4px !important; 
+  vertical-align: middle;
+}
+
+[data-theme="claudionday"] .v-selection-control__input i {
+  font-size: 16px !important; 
+  width: 16px !important;
+  height: 16px !important;
+  margin-right: 4px !important; 
+  vertical-align: middle;
+}
+
+[data-theme="claudionday"] label.v-label.v-label--clickable[for="checkbox-90"] {
+  font-family: "Host Grotesk", sans-serif !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  font-size: 12px !important;
+  line-height: 120% !important;
+  color: #020D0F !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: inline-block !important;
+  width: 100% !important;
+  height: 14px !important;
+  vertical-align: middle;
+}
+
+[data-theme="claudionday"] .v-selection-control__wrapper {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important; 
+}
+[data-theme="claudionday"] .text-h5.text-primary:before {
+  content: "";
+  display: inline-block;
+  width: 20px !important;
+  height: 20px !important;
+  background-image: url("/assets/posawesome/assets/Invoice.svg") !important; 
+  background-size: cover;
+  background-repeat: no-repeat;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+
+[data-theme="claudionday"] .text-h5.text-primary {
+  width: 149px !important;
+  height: 18px !important;
+  opacity: 1 !important;
+  font-family: "Host Grotesk", sans-serif !important;
+  font-weight: 600 !important; /* SemiBold */
+  font-style: normal !important;
+  font-size: 16px !important;
+  line-height: 115% !important;
+  letter-spacing: 0% !important;
+  color: #131415 !important;
+}
+
+[data-theme="claudionday"] .v-card-title {
+
+
+  width: 100% !important;
+  height: 56px !important;
+  gap: 4px !important;
+  opacity: 1 !important;
+  border-bottom: 1px solid #A7A8A8 !important;
+}
+
+[data-theme="claudionday"] .v-card.v-card--variant-elevated:has(.v-card-title span:contains("Select Return Invoice"))
+
+{
+  width: 560px !important;
+  height: 140px !important;
+  opacity: 1 !important;
+  border-radius: 12px !important;
+}
+
+[data-theme="claudionday"] button.v-btn.bg-primary.v-theme--dark.v-btn--elevated.v-btn--density-default.v-btn--size-default.v-btn--variant-elevated.pa-1 {
+  width: 62px !important;
+  height: 36px !important;
+  padding: 8px 12px !important;
+  border-radius: 6px !important;
+  background-color: #073C44 !important;
+  border: 1px solid #073C44 !important;
+  opacity: 1 !important;
+}
+[data-theme="claudionday"] button.v-btn.bg-primary.v-theme--dark.v-btn--elevated.v-btn--density-default.v-btn--size-default.v-btn--variant-elevated.pa-1 .v-btn__content {
+  width: 38px !important;
+  height: 14px !important;
+  opacity: 1 !important;
+
+  font-family: 'Host Grotesk', sans-serif !important;
+  font-weight: 600 !important; 
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0px !important;
+
+  text-align: center !important;
+  vertical-align: middle !important;
+  color: #FFFFFF !important;
+}
+[data-theme="claudionday"] .text-h6.text-warning {
+  width: 722px !important;
+  height: 23px !important;
+  opacity: 1 !important;
+
+  font-family: 'Host Grotesk', sans-serif !important;
+  font-weight: 600 !important; 
+  font-size: 20px !important;
+  line-height: 115% !important; 
+  letter-spacing: 0 !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  color: #131415 !important;
+}
+[data-theme="claudionday"] button.v-btn.bg-warning.v-theme--dark.v-btn--block.v-btn--elevated.v-btn--density-default.v-btn--size-large.v-btn--variant-elevated.pa-1 {
+  width: 325px !important;
+  height: 36px !important;
+  padding: 8px 12px !important;
+  gap: 8px !important;
+  opacity: 1 !important;
+
+  border-radius: 6px !important;
+  background-color: #073C44 !important;
+  border: 1px solid #073C44 !important;
+}
+
+[data-theme="claudionday"] button.v-btn.bg-warning.v-theme--dark.v-btn--block.v-btn--elevated.v-btn--density-default.v-btn--size-large.v-btn--variant-elevated.pa-1 .v-btn__content {
+  width: 32px !important;
+  height: 17px !important;
+  opacity: 1 !important;
+
+  font-family: 'Host Grotesk', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  line-height: 120% !important; 
+  letter-spacing: 0px !important;
+
+  text-align: center !important;
+  vertical-align: middle !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="claudionday"] .text-h6.text-primary {
+  width: 722px !important;
+  height: 23px !important;
+  opacity: 1 !important;
+
+  font-family: 'Host Grotesk', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 20px !important;
+  line-height: 115% !important; 
+  letter-spacing: 0 !important;
+
+  text-align: left !important;
+  vertical-align: middle !important;
+  color: #131415 !important;
+}
+[data-theme="claudionday"] .v-card.v-card--hover.v-card--link.v-theme--light.v-card--density-default.v-card--variant-elevated {
+  width: 153px !important;
+  height: 209px !important;
+  opacity: 1 !important;
+
+  border-radius: 8px !important;
+  border: 1px solid #A7A8A8 !important;
+}
+[data-theme="claudionday"] .v-card-text.text--primary.pa-1 .text-caption {
+  font-family: 'Host Grotesk', sans-serif !important;
+  font-weight: 500 !important;
+  font-style: normal !important;
+  font-size: 11px !important;
+  line-height: 130% !important;
+  letter-spacing: 0px !important;
+  width: 129 px !important;
+  height: 42 !important;
+}
