@@ -106,16 +106,6 @@
 
               <v-col cols="6">
                 <v-text-field
-                  v-model="customer_info.custom_building_number"
-                  :maxlength="4"
-                  :label="$t('Building Number')"
-                  dense
-                  hide-details
-                />
-              </v-col>
-
-              <v-col cols="6">
-                <v-text-field
                   v-model="customer_info.pincode"
                   :maxlength="5"
                   :label="$t('Pincode')"
@@ -174,11 +164,11 @@ export default {
       loyalty_points: 0,
       address_line1: "",
       address_line2: "",
-      custom_building_number: "",
+      //custom_building_number: "",
       pincode: "",
       city: "",
-      custom_b2c: false,
-      custom_buyer_id: "",
+      //custom_b2c: false,
+      //custom_buyer_id: "",
       tax_id: "",
     },
   }),
@@ -199,37 +189,12 @@ export default {
         return;
       }
 
-      if (!vm.customer_info.custom_b2c) {
-        const requiredFields = [
-          { key: "address_line1", message: "Address Line 1 is required for B2B customers." },
-          { key: "address_line2", message: "Address Line 2 is mandatory for B2B customers!" },
-          { key: "custom_building_number", message: "Building Number is mandatory for B2B customers!" },
-          { key: "pincode", message: "Pincode is mandatory for B2B customers!" },
-          { key: "custom_buyer_id", message: "Customer ID is mandatory for B2B customers!" },
-        ];
 
-        for (const field of requiredFields) {
-          if (!vm.customer_info[field.key]) {
-            vm.eventBus.emit("show_message", {
-              text: vm.$t(field.message),
-              color: "error",
-            });
-            return;
-          }
-        }
-      }
+
 
       if (vm.customer_info.address_line1 && !vm.customer_info.city) {
         vm.eventBus.emit("show_message", {
           text: vm.$t("City is mandatory when address is provided!"),
-          color: "error",
-        });
-        return;
-      }
-
-      if (vm.customer_info.custom_building_number && !/^\d{4}$/.test(vm.customer_info.custom_building_number)) {
-        vm.eventBus.emit("show_message", {
-          text: vm.$t("Building number must be exactly 4 digits!"),
           color: "error",
         });
         return;
@@ -252,8 +217,8 @@ export default {
       }
 
       const fields_to_update = [
-        "mobile_no", "tax_id", "referral_code", "custom_b2c", "address_line1",
-        "address_line2", "custom_building_number", "pincode", "city", "custom_buyer_id",
+        "mobile_no", "tax_id", "referral_code", "address_line1",
+        "address_line2", "pincode", "city",
       ];
 
       vm.customer_info.referral_code = vm.referral_code;
@@ -318,7 +283,6 @@ export default {
       };
       this.referral_code = data.posa_referral_code || "";
       this.original_customer_info = JSON.parse(JSON.stringify(this.customer_info));
-
       frappe.call({
         method: "posawesome.posawesome.api.posapp.get_customer_address",
         args: { customer_name: data.name },
@@ -329,7 +293,6 @@ export default {
             this.customer_info.address_line2 = addr.address_line2;
             this.customer_info.city = addr.city;
             this.customer_info.pincode = addr.pincode;
-            this.customer_info.custom_building_number = addr.custom_building_number;
           }
         },
       });

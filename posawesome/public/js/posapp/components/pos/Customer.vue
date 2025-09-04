@@ -22,25 +22,6 @@
       prepend-inner-icon="mdi-account-edit"
       @click:prepend-inner="edit_customer"
     >
-      <template v-slot:item="{ props, item }">
-        <v-list-item v-bind="props">
-          <v-list-item-subtitle v-if="item.raw.customer_name !== item.raw.name">
-            <div v-html="`${$t('ID')}: ${item.raw.name}`"></div>
-          </v-list-item-subtitle>
-          <v-list-item-subtitle v-if="item.raw.tax_id">
-            <div v-html="`${$t('TAX ID')}: ${item.raw.tax_id}`"></div>
-          </v-list-item-subtitle>
-          <v-list-item-subtitle v-if="item.raw.email_id">
-            <div v-html="`${$t('Email')}: ${item.raw.email_id}`"></div>
-          </v-list-item-subtitle>
-          <v-list-item-subtitle v-if="item.raw.mobile_no">
-            <div v-html="`${$t('Mobile No')}: ${item.raw.mobile_no}`"></div>
-          </v-list-item-subtitle>
-          <v-list-item-subtitle v-if="item.raw.primary_address">
-            <div v-html="`${$t('Primary Address')}: ${item.raw.primary_address}`"></div>
-          </v-list-item-subtitle>
-        </v-list-item>
-      </template>
     </v-autocomplete>
 
     <div class="mb-8">
@@ -49,6 +30,7 @@
     </div>
   </div>
 </template>
+
 
 <script>
 import NewCustomer from "./NewCustomer.vue";
@@ -120,10 +102,22 @@ export default {
       this.eventBus.emit("open_new_customer");
     },
 
+    //edit_customer() {
+     // console.log("1");
+      //this.eventBus.emit("set_customer_info_to_edit", this.customer_info);
+      //this.eventBus.emit("open_edit_customer");
+    //},
     edit_customer() {
-      this.eventBus.emit("set_customer_info_to_edit", this.customer_info);
+      this.eventBus.emit("set_customer_info_to_edit", {
+        name: this.customer_info.customer_name,       // ERPNext customer ID
+        customer_name: this.customer_info.customer_name,
+        email_id: this.customer_info.email_id,
+        mobile_no: this.customer_info.mobile_no,
+        posa_referral_code: this.customer_info.referral_code,
+      });
       this.eventBus.emit("open_edit_customer");
     },
+
 
     customFilter(itemText, queryText, itemRow) {
       const item = itemRow.raw;
@@ -188,48 +182,54 @@ export default {
   },
 
   watch: {
-    customer(newVal) {
-      this.eventBus.emit("update_customer", newVal);
+  customer(newVal) {
+    this.eventBus.emit("update_customer", newVal);
 
-      if (!newVal || !Array.isArray(this.customers)) {
+    if (!newVal || !Array.isArray(this.customers)) {
+      this.eventBus.emit("update_customer_discount_level", null);
+      this.last_discount_level = null;
+      this.customer_info = {}; // reset
+      return;
+    }
+
+    // Find full customer object
+    const selected = this.customers.find((c) => c.name === newVal);
+    if (selected) {
+      // ✅ Store full customer details here
+      this.customer_info = {
+        name: selected.name,
+        customer_name: selected.customer_name,
+        email_id: selected.email_id,
+        mobile_no: selected.mobile_no,
+        posa_referral_code: selected.posa_referral_code,
+        customer_group: selected.customer_group,
+      };
+
+      this.eventBus.emit("update_customer_group", selected.customer_group);
+    }
+
+    // handle discount levels (your existing logic)
+    if (selected && selected.custom_discount_level != null) {
+      if ([1, 2].includes(Number(selected.custom_discount_level))) {
+        if (this.last_discount_level !== selected.custom_discount_level) {
+          this.eventBus.emit(
+            "update_customer_discount_level",
+            selected.custom_discount_level
+          );
+          this.last_discount_level = selected.custom_discount_level;
+        }
+      } else if (this.last_discount_level !== null) {
         this.eventBus.emit("update_customer_discount_level", null);
         this.last_discount_level = null;
-        return;
       }
-
-      // Find full customer object
-      const selected = this.customers.find((c) => c.name === newVal);
-      if (selected) {
-        // ✅ Emit this!
-        this.eventBus.emit("update_customer_group", selected.customer_group);
-      }
-
-      if (selected && selected.custom_discount_level != null) {
-        // Only for wholesale customers (level 1 or 2)
-        if ([1, 2].includes(Number(selected.custom_discount_level))) {
-          if (this.last_discount_level !== selected.custom_discount_level) {
-            this.eventBus.emit(
-              "update_customer_discount_level",
-              selected.custom_discount_level
-            );
-            this.last_discount_level = selected.custom_discount_level;
-          }
-        } else {
-          // Not wholesale, reset discount level if changed
-          if (this.last_discount_level !== null) {
-            this.eventBus.emit("update_customer_discount_level", null);
-            this.last_discount_level = null;
-          }
-        }
-      } else {
-        // Customer not found or no discount level
-        if (this.last_discount_level !== null) {
-          this.eventBus.emit("update_customer_discount_level", null);
-          this.last_discount_level = null;
-        }
-      }
-    },
+    } else if (this.last_discount_level !== null) {
+      this.eventBus.emit("update_customer_discount_level", null);
+      this.last_discount_level = null;
+    }
   },
+},
+
+
 
 };
 </script>

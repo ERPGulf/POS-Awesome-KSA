@@ -759,7 +759,7 @@ def update_invoice(data):
     frappe.flags.ignore_account_permission = True
     invoice_doc.set_missing_values()
     invoice_doc.calculate_taxes_and_totals()
-    invoice_doc.rounded_total = frappe.utils.rounded(invoice_doc.grand_total)
+    # invoice_doc.rounded_total = frappe.utils.rounded(invoice_doc.grand_total)
     for item in invoice_doc.items:
         # discount_level = cint(frappe.get_value("Customer", invoice_doc.customer, "custom_discount_level") or 0)
         customer = frappe.get_doc("Customer", invoice_doc.customer)
@@ -853,6 +853,7 @@ def update_invoice(data):
         #     # frappe.log_error("Wholesale Rate for item", item.rate)
 
         # add_taxes_from_tax_template(item, invoice_doc)
+    invoice_doc.calculate_taxes_and_totals()
     if frappe.get_value("POS Profile", invoice_doc.pos_profile, "posa_tax_inclusive"):
         if invoice_doc.get("taxes"):
             for tax in invoice_doc.taxes:
@@ -907,7 +908,6 @@ def update_invoice(data):
     #     invoice_doc.grand_total = 0
     #     invoice_doc.rounded_total = 0
     # Apply wholesale pricing based on customer's custom_discount_level
-    frappe.log_error("taxes", invoice_doc.total_taxes_and_charges)
     invoice_doc.save()
     frappe.db.commit()
     if(invoice_doc.shipping_rule):
@@ -1215,6 +1215,7 @@ def submit_invoice(invoice, data):
             
         if invoice_doc.is_return:
             invoice_doc.update_outstanding_for_self = 0
+
         invoice_doc.submit()
         redeeming_customer_credit(
             invoice_doc, data, is_payment_entry, total_cash, cash_account, payments
@@ -2046,8 +2047,7 @@ def get_customer_address(customer_name):
             "address_line1",
             "address_line2",
             "city",
-            "pincode",
-            "custom_building_number"
+            "pincode"
         ],
         limit_page_length=1
     )
@@ -2860,4 +2860,4 @@ def get_wholesale_rates(pos_profile, item_code):
 
         return wholesale_rate
 
-    return 0
+    return     

@@ -121,13 +121,15 @@
                   dense
                   auto-select-first
                   color="indigo"
-                  :label="$t('Customer Group')"
+                  :label="$t('Customer Group') + ' *'"
                   v-model="group"
                   :items="groups"
                   background-color="white"
                   :no-data-text="$t('Group not found')"
                   hide-details
+                  :rules="[(v) => !!v || $t('Customer Group is required')]"
                 />
+
               </v-col>
               <v-col cols="6">
                 <v-autocomplete
@@ -181,19 +183,6 @@
                   background-color="white"
                   hide-details
                   v-model="address_line2"
-                />
-              </v-col>
-              <v-col cols="6">
-                <v-text-field
-                  dense
-                  color="indigo"
-                  :label="$t('Building No')"
-                  background-color="white"
-                  hide-details
-                  v-model="custom_building_number"
-                  :maxlength="4"
-                  @blur="validateBuildingNumber"
-                  :error="!isValidBuildingNumber"
                 />
               </v-col>
               <v-col cols="6">
@@ -464,6 +453,14 @@ export default {
           });
           return;
         }
+        if (!this.group) {
+          this.eventBus.emit("show_message", {
+            text: __("Customer Group is mandatory!"),
+            color: "error",
+          });
+          return;
+        }
+
 
         frappe.call({
           method: "posawesome.posawesome.api.posapp.create_customer",
