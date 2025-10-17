@@ -78,6 +78,7 @@
             v-for="payment in invoice_doc.payments"
             :key="payment.name"
           >
+
             <v-col cols="6" v-if="!is_mpesa_c2b_payment(payment)">
               <v-text-field
                 density="compact"
@@ -95,6 +96,7 @@
                 :readonly="invoice_doc.is_return ? false : false"
               />
             </v-col>
+
             <v-col
               v-if="!is_mpesa_c2b_payment(payment)"
               :cols="
@@ -111,7 +113,7 @@
                 class=""
                 color="primary"
                 theme="dark"
-                @click="set_full_amount(payment.idx)"
+                @click="set_full_amount(payment)"
                 >{{ $t(payment.mode_of_payment) }}</v-btn
               >
             </v-col>
@@ -619,6 +621,7 @@
       </div>
     </v-card>
 
+
     <v-card flat class="cards mb-0 mt-3 py-0">
       <v-row align="start" no-gutters>
         <v-col cols="6">
@@ -699,6 +702,7 @@ import format from "../../format";
 export default {
   mixins: [format],
   data: () => ({
+    bank_draft_approved: false,
     custom_discount_level: null,
     include_payment: false,
     loading: false,
@@ -728,6 +732,57 @@ export default {
   }),
 
   methods: {
+
+  bank_draft_payment() {
+    const vm = this;
+    vm.loading = true;
+    this.eventBus.emit("freeze", {
+      title: this.$t("Processing Bank Draft..."),
+    });
+
+    frappe.call({
+      method: "posawesome.posawesome.api.posapp.bank_draft_payment",
+      args: {
+        invoice_name: vm.invoice_doc.name,
+        customer: vm.invoice_doc.customer,
+        amount: vm.invoice_doc.rounded_total || vm.invoice_doc.grand_total,
+      },
+    callback(r) {
+      vm.loading = false;
+      vm.eventBus.emit("unfreeze");
+      const data = r.message?.message || r.message;
+
+      if (data && data.final_Status === 1) {
+        vm.bank_draft_approved = true;
+        vm.bank_draft_transaction_id = data.transaction_id;  // ✅ store temporarily in frontend
+
+        vm.eventBus.emit("show_message", {
+          text: vm.$t("Bank Draft Payment Approved"),
+          color: "success",
+        });
+      } else {
+        vm.bank_draft_approved = false;
+        vm.bank_draft_transaction_id = null;
+        vm.eventBus.emit("show_message", {
+          text: vm.$t("Bank Draft Denied. Please try again."),
+          color: "error",
+        });
+      }
+    },
+
+      error() {
+        vm.loading = false;
+        vm.bank_draft_approved = false;
+        vm.eventBus.emit("unfreeze");
+        vm.eventBus.emit("show_message", {
+          text: vm.$t("Bank Draft API Request Error"),
+          color: "error",
+        });
+      },
+    });
+  },
+
+
     recalculate_totals() {
       let net_total = 0;
       let total = 0;
@@ -793,6 +848,28 @@ export default {
       this.eventBus.emit("set_customer_readonly", false);
     },
     submit(event, payment_received = false, print = false) {
+      const hasBankDraft = this.invoice_doc.payments.some(
+        (p) =>
+          p.mode_of_payment &&
+          p.mode_of_payment.toLowerCase() === "bank draft" &&
+          p.amount > 0 // ensure it's actually being used
+      );
+
+      if (hasBankDraft && !this.bank_draft_approved) {
+        this.eventBus.emit("show_message", {
+          text: this.$t("❌ Bank Draft not approved. Cannot submit invoice."),
+          color: "error",
+        });
+        frappe.utils.play_sound("error");
+        return;
+      }
+        if (this.loading) {
+          this.eventBus.emit("show_message", {
+            text: this.$t("Bank Draft in progress. Please wait..."),
+            color: "warning",
+          });
+          return;
+        }
       if (!this.is_credit_sale) {
         if (
           this.is_cashback &&
@@ -942,6 +1019,13 @@ export default {
       this.is_sucessful_invoice = this.submit_invoice(print);
     },
     submit_invoice(print) {
+      if (this.bank_draft_transaction_id) {
+        this.invoice_doc.payments.forEach(p => {
+          if (p.mode_of_payment && p.mode_of_payment.toLowerCase() === "bank draft") {
+            p.custom_transaction_id = this.bank_draft_transaction_id;
+          }
+        });
+      }
       let totalPayedAmount = 0;
       this.invoice_doc.payments.forEach((payment) => {
         payment.amount = flt(payment.amount);
@@ -1007,14 +1091,24 @@ export default {
         },
       });
     },
-    set_full_amount(idx) {
-      this.invoice_doc.payments.forEach((payment) => {
-        payment.amount =
-          payment.idx == idx
+    set_full_amount(payment) {
+
+      // normal payments → set full amount
+      this.invoice_doc.payments.forEach((p) => {
+        p.amount =
+          p.idx === payment.idx
             ? this.invoice_doc.rounded_total || this.invoice_doc.grand_total
             : 0;
       });
+
+      // if Bank Draft → call API
+      if (payment.mode_of_payment?.toLowerCase() === "bank draft") {
+        this.bank_draft_payment(payment);
+        return; // stop here so it doesn’t overwrite amounts
+      }
+
     },
+
     set_rest_amount(idx) {
       this.invoice_doc.payments.forEach((payment) => {
         if (

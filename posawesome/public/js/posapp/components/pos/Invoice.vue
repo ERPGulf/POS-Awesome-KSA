@@ -613,25 +613,6 @@
               ></v-text-field>
             </v-col>
 
-            <v-col cols="6" class="pa-1 mt-2">
-              <v-autocomplete
-                v-model="shipping_rule"
-                :items="shipping_rules"
-                item-title="name"
-                item-value="name"
-                :label="$t('Shipping Rule')"
-                return-object
-                clearable
-                :no-data-text="$t('Shipping Rule not found')"
-                variant="outlined"
-                background-color="white"
-                density="compact"
-                color="primary"
-                :disabled="readonly"
-                @focus="get_shipping_rule_names()"
-              />
-            </v-col>
-
             <v-col
               cols="6"
               class="pa-1"

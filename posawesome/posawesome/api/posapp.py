@@ -5,6 +5,8 @@
 from __future__ import unicode_literals
 import json
 import frappe
+import requests
+import uuid
 from frappe.utils import cint
 from frappe.utils import nowdate, flt, cstr, getdate
 from frappe import _
@@ -21,6 +23,7 @@ from erpnext.accounts.doctype.payment_request.payment_request import (
     get_dummy_message,
     get_existing_payment_request_amount,
 )
+# from geidea_erpgulf import api.method.geidea_erpgulf.posaw_test.send_request_to_device
 
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
@@ -1215,6 +1218,11 @@ def submit_invoice(invoice, data):
             
         if invoice_doc.is_return:
             invoice_doc.update_outstanding_for_self = 0
+        for p in invoice_doc.payments:
+            if p.mode_of_payment and p.mode_of_payment.lower() == "bank draft":
+                if not p.custom_transaction_id and data.get("bank_draft_transaction_id"):
+                    p.custom_transaction_id = data["bank_draft_transaction_id"]
+
 
         invoice_doc.submit()
         redeeming_customer_credit(
@@ -2861,3 +2869,53 @@ def get_wholesale_rates(pos_profile, item_code):
         return wholesale_rate
 
     return     
+
+ 
+@frappe.whitelist()
+def bank_draft_payment(invoice_name, customer, amount):
+    
+    # url = "https://sahana.erpgulf.com:3768/api/method/geidea_erpgulf.geidea_erpgulf.posaw_test.send_request_to_device"
+    parsed_url = frappe.local.conf.host_name
+    frappe.log_error("parsed_url",parsed_url)
+    path = "/api/method/geidea_erpgulf.geidea_erpgulf.posaw_test.send_request_to_device"
+    url = f"{parsed_url.rstrip('/')}{path}" 
+    frappe.log_error("url",url)
+
+    
+    # Generate a unique UUID (string)
+    unique_id = str(uuid.uuid4())
+
+    payload = {
+        "user": frappe.session.user,
+        "amount": amount,
+        "invoice_number": invoice_name,
+        "uuid": unique_id,
+        "customer": customer,
+        "callback_url":parsed_url
+    }
+    frappe.log_error("payload",payload)
+
+    r = requests.post(url, json=payload, timeout=(10, 120)) 
+
+
+    try:
+        response_json = r.json()   # ✅ actually call .json()
+    except ValueError:
+        response_json = {"error": "Invalid JSON", "text": r.text}
+
+    # Log raw response for debugging
+    frappe.log_error(f"Bank Draft API Response: {r.status_code}", response_json)
+    # data = response_json.get("message") or response_json
+    # if data and data.get("final_Status") == 1 and data.get("transaction_id"):
+    #     invoice_doc = frappe.get_doc("Sales Invoice", invoice_name)
+    #     for p in invoice_doc.payments:
+    #         if (
+    #             p.mode_of_payment
+    #             and p.mode_of_payment.lower() == "bank draft"
+    #             and not p.custom_transaction_id  # only update if empty
+    #         ):
+    #             p.custom_transaction_id = data["transaction_id"]
+    #     invoice_doc.save(ignore_permissions=True)
+    #     frappe.db.commit()
+
+    return response_json
