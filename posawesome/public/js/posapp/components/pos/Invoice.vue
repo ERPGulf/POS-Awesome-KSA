@@ -706,6 +706,46 @@
                 color="success"
               ></v-text-field>
             </v-col>
+
+            <v-col
+              cols="6"
+              class="pa-1"
+            >
+            <v-autocomplete
+              v-model="shipping_rule"
+              :items="shipping_rules"
+              item-title="name"
+              item-value="name"
+              :label="$t('Shipping Rule')"
+              density="compact"
+              variant="outlined"
+              bg-color="white"
+              clearable
+              hide-details
+              @focus="onShippingRuleFocus"
+            />
+
+            </v-col>
+
+
+            <v-col
+              cols="6"
+              class="pa-1"
+              v-if="invoice_doc.is_return"
+            >
+              <v-autocomplete
+                v-model="returned_item_note"
+                :items="returned_item_note_options"
+                :label="$t('Returned Item Note')"
+                density="compact"
+                variant="outlined"
+                color="primary"
+                bg-color="white"
+                hide-details
+                clearable
+              ></v-autocomplete>
+            </v-col>
+
           </v-row>
         </v-col>
         <v-col cols="5">
@@ -811,6 +851,8 @@ export default {
   mixins: [format],
   data() {
     return {
+      returned_item_note: null,
+      returned_item_note_options: [],
       custom_discount_level: null,
       custom_buyer_id_type: "",
       pos_profile: "",
@@ -827,6 +869,7 @@ export default {
       posOffers: [],
       posa_offers: [],
       posa_coupons: [],
+      
       shipping_rules: [],
       shipping_rule: "",
       allItems: [],
@@ -916,6 +959,16 @@ export default {
   },
 
   methods: {
+    async getReturnedItemNoteOptions() {
+      try {
+        const res = await frappe.call({
+          method: "posawesome.posawesome.api.posapp.get_returned_item_note_options",
+        });
+        this.returned_item_note_options = res.message || [];
+      } catch (e) {
+        console.error("Failed to load returned item note options", e);
+      }
+    },
     update_item_rate(item) {
       const level = this.custom_discount_level;
       const profileType = this.pos_profile?.custom_profile_type || "";
@@ -1286,19 +1339,19 @@ export default {
         if (doc.items.length) {
           old_invoice = this.update_invoice(doc);
         } else {
-  this.eventBus.emit("show_message", {
-    text: this.$t('nothing_to_save'),
-    color: "error",
-  });
-}
+          this.eventBus.emit("show_message", {
+            text: this.$t('nothing_to_save'),
+            color: "error",
+          });
+        }
 
       }
       if (!old_invoice) {
-  this.eventBus.emit("show_message", {
-    text: this.$t('error_saving_invoice'),
-    color: "error",
-  });
-} else {
+        this.eventBus.emit("show_message", {
+          text: this.$t('error_saving_invoice'),
+          color: "error",
+        });
+      } else {
         this.clear_invoice();
         return old_invoice;
       }
@@ -1451,6 +1504,8 @@ export default {
       doc.posa_delivery_charges_rate = this.delivery_charges_rate || 0;
       doc.posting_date = this.posting_date;
       doc.shipping_rule = this.shipping_rule;
+
+      doc.custom_returned_item_note  = this.returned_item_note || null;
       return doc;
     },
 
@@ -1628,6 +1683,7 @@ export default {
           }
         },
       });
+      //console.log("doc",this.invoice_doc)
       return this.invoice_doc;
     },
 
@@ -3199,6 +3255,7 @@ export default {
   },
 
   mounted() {
+    this.getReturnedItemNoteOptions();
     this.eventBus.on("test_mounting", (item) => {
       console.log("test_mounting");
     });

@@ -243,6 +243,21 @@
               :prefix="currencySymbol(invoice_doc.currency)"
             ></v-text-field>
           </v-col>
+
+          <v-col cols="6" v-if="invoice_doc.shipping_rule">
+            <v-text-field
+              density="compact"
+              variant="outlined"
+              color="primary"
+              :label="$t('Shipping Charge')"
+              bg-color="white"
+              hide-details
+              :model-value="shipping_charge"
+              disabled
+              :prefix="currencySymbol(invoice_doc.currency)"
+            ></v-text-field>
+          </v-col>
+
           <v-col cols="6">
             <v-text-field
               density="compact"
@@ -702,7 +717,9 @@ import format from "../../format";
 export default {
   mixins: [format],
   data: () => ({
-    bank_draft_approved: false,
+    custom_device_enabled: false,
+    shipping_charge: 0,
+    credit_card_approved: false,
     custom_discount_level: null,
     include_payment: false,
     loading: false,
@@ -732,16 +749,37 @@ export default {
   }),
 
   methods: {
+    async fetchDeviceStatus() {
+      const res = await frappe.call({
+        method: "posawesome.posawesome.api.posapp.is_device_enabled",
+      });
 
-  bank_draft_payment() {
+      this.custom_device_enabled = res.message === 1;
+    },
+
+    async fetchShippingCharge() {
+      if (!this.invoice_doc?.name) return;
+
+      const res = await frappe.call({
+        method: "posawesome.posawesome.api.posapp.get_shipping_charge",
+        args: {
+          invoice_name: this.invoice_doc.name
+        }
+      });
+
+      this.shipping_charge = res.message.shipping_charge;
+      return this.shipping_charge; // optional
+    },
+
+  credit_card_payment() {
     const vm = this;
     vm.loading = true;
     this.eventBus.emit("freeze", {
-      title: this.$t("Processing Bank Draft..."),
+      title: this.$t("Processing Credit Card..."),
     });
 
     frappe.call({
-      method: "posawesome.posawesome.api.posapp.bank_draft_payment",
+      method: "posawesome.posawesome.api.posapp.credit_card_payment",
       args: {
         invoice_name: vm.invoice_doc.name,
         customer: vm.invoice_doc.customer,
@@ -753,18 +791,18 @@ export default {
       const data = r.message?.message || r.message;
 
       if (data && data.final_Status === 1) {
-        vm.bank_draft_approved = true;
-        vm.bank_draft_transaction_id = data.transaction_id;  // ✅ store temporarily in frontend
+        vm.credit_card_approved = true;
+        vm.credit_card_transaction_id = data.transaction_id;  // ✅ store temporarily in frontend
 
         vm.eventBus.emit("show_message", {
-          text: vm.$t("Bank Draft Payment Approved"),
+          text: vm.$t("Credit Card Payment Approved"),
           color: "success",
         });
       } else {
-        vm.bank_draft_approved = false;
-        vm.bank_draft_transaction_id = null;
+        vm.credit_card_approved = false;
+        vm.credit_card_transaction_id = null;
         vm.eventBus.emit("show_message", {
-          text: vm.$t("Bank Draft Denied. Please try again."),
+          text: vm.$t("Credit Card Denied. Please try again."),
           color: "error",
         });
       }
@@ -772,10 +810,10 @@ export default {
 
       error() {
         vm.loading = false;
-        vm.bank_draft_approved = false;
+        vm.credit_card_approved = false;
         vm.eventBus.emit("unfreeze");
         vm.eventBus.emit("show_message", {
-          text: vm.$t("Bank Draft API Request Error"),
+          text: vm.$t("Credit Card API Request Error"),
           color: "error",
         });
       },
@@ -848,16 +886,16 @@ export default {
       this.eventBus.emit("set_customer_readonly", false);
     },
     submit(event, payment_received = false, print = false) {
-      const hasBankDraft = this.invoice_doc.payments.some(
+      const hasCreditCard = this.invoice_doc.payments.some(
         (p) =>
           p.mode_of_payment &&
-          p.mode_of_payment.toLowerCase() === "bank draft" &&
+          p.mode_of_payment.toLowerCase() === "credit card" &&
           p.amount > 0 // ensure it's actually being used
       );
 
-      if (hasBankDraft && !this.bank_draft_approved) {
+      if (hasCreditCard && !this.credit_card_approved && this.custom_device_enabled) {
         this.eventBus.emit("show_message", {
-          text: this.$t("❌ Bank Draft not approved. Cannot submit invoice."),
+          text: this.$t("❌ Credit Card not approved. Cannot submit invoice."),
           color: "error",
         });
         frappe.utils.play_sound("error");
@@ -865,7 +903,7 @@ export default {
       }
         if (this.loading) {
           this.eventBus.emit("show_message", {
-            text: this.$t("Bank Draft in progress. Please wait..."),
+            text: this.$t("Credit Card in progress. Please wait..."),
             color: "warning",
           });
           return;
@@ -1019,10 +1057,10 @@ export default {
       this.is_sucessful_invoice = this.submit_invoice(print);
     },
     submit_invoice(print) {
-      if (this.bank_draft_transaction_id) {
+      if (this.credit_card_transaction_id) {
         this.invoice_doc.payments.forEach(p => {
-          if (p.mode_of_payment && p.mode_of_payment.toLowerCase() === "bank draft") {
-            p.custom_transaction_id = this.bank_draft_transaction_id;
+          if (p.mode_of_payment && p.mode_of_payment.toLowerCase() === "credit card") {
+            p.custom_transaction_id = this.credit_card_transaction_id;
           }
         });
       }
@@ -1101,9 +1139,9 @@ export default {
             : 0;
       });
 
-      // if Bank Draft → call API
-      if (payment.mode_of_payment?.toLowerCase() === "bank draft") {
-        this.bank_draft_payment(payment);
+      // if Credit Card → call API
+      if (payment.mode_of_payment?.toLowerCase() === "credit card" && this.custom_device_enabled) {
+        this.credit_card_payment(payment);
         return; // stop here so it doesn’t overwrite amounts
       }
 
@@ -1446,37 +1484,11 @@ export default {
     },
     total_payments() {
       let total = 0;
+      total = parseFloat(this.invoice_doc.loyalty_amount);
+      total +=this.invoice_doc.rounded_total;
+      total += this.flt(this.redeemed_customer_credit);
 
-      const wholesaleProfiles = [
-        "Wholesale POS",
-        "Wholesale - Western",
-        "Wholesale - Eastern",
-        "Wholesale - Central",
-        "Orange Station POS",
-        "Wholesale Central 2 POS",
-      ];
-
-      const isWholesale = wholesaleProfiles.includes(this.pos_profile?.name);
-
-      if (isWholesale) {
-        if (this.invoice_doc && this.invoice_doc.payments) {
-          this.invoice_doc.payments.forEach((payment) => {
-            total += this.flt(payment.amount);
-          });
-        }
-      } else {
-        total = parseFloat(this.invoice_doc.loyalty_amount);
-
-        if (this.invoice_doc && this.invoice_doc.payments) {
-          this.invoice_doc.payments.forEach((payment) => {
-            total += this.flt(payment.amount);
-          });
-        }
-
-        total += this.flt(this.redeemed_customer_credit);
-
-        if (!this.is_cashback) total = 0;
-      }
+      if (!this.is_cashback) total = 0;
 
       return this.flt(total, this.currency_precision);
     },
@@ -1563,6 +1575,7 @@ export default {
   },
 
   mounted: function () {
+    this.fetchDeviceStatus();
     this.$nextTick(function () {
       this.eventBus.on("send_invoice_doc_payment", (invoice_doc) => {
         this.invoice_doc = invoice_doc;
@@ -1696,6 +1709,9 @@ export default {
   },
 
   watch: {
+      "invoice_doc.shipping_rule"(newVal) {
+        this.fetchShippingCharge();
+      },
     custom_discount_level: {
       handler(newVal) {
         if (this.invoice_doc && Array.isArray(this.invoice_doc.items)) {

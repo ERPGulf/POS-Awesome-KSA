@@ -12,7 +12,7 @@
                 <v-text-field
                   dense
                   color="indigo"
-                  :label="$t('Customer Name') + ' *'"
+                  :label="$t('Customer Name')+ ' *'"
                   background-color="white"
                   hide-details
                   v-model="customer_name"
@@ -23,17 +23,7 @@
                 <v-text-field
                   dense
                   color="indigo"
-                  :label="$t('Tax ID')"
-                  background-color="white"
-                  hide-details
-                  v-model="tax_id"
-                />
-              </v-col>
-              <v-col cols="6">
-                <v-text-field
-                  dense
-                  color="indigo"
-                  :label="$t('Mobile No')"
+                  :label="$t('Mobile No')+ ' *'"
                   background-color="white"
                   hide-details
                   v-model="mobile_no"
@@ -51,28 +41,6 @@
                   background-color="white"
                   hide-details
                   v-model="email_id"
-                />
-              </v-col>
-              <v-col cols="6">
-                <v-select
-                  dense
-                  color="indigo"
-                  :label="$t('Referral Code') + ' *'"
-                  background-color="white"
-                  hide-details
-                  v-model="referral_code"
-                  :items="refcodes"
-                />
-              </v-col>
-              <v-col cols="6">
-                <v-select
-                  dense
-                  color="indigo"
-                  :label="$t('Company')"
-                  background-color="white"
-                  hide-details
-                  v-model="company"
-                  :items="companies"
                 />
               </v-col>
               <v-col cols="6">
@@ -115,89 +83,7 @@
                   </v-date-picker>
                 </v-menu>
               </v-col>
-              <v-col cols="6">
-                <v-autocomplete
-                  clearable
-                  dense
-                  auto-select-first
-                  color="indigo"
-                  :label="$t('Customer Group') + ' *'"
-                  v-model="group"
-                  :items="groups"
-                  background-color="white"
-                  :no-data-text="$t('Group not found')"
-                  hide-details
-                  :rules="[(v) => !!v || $t('Customer Group is required')]"
-                />
 
-              </v-col>
-              <v-col cols="6">
-                <v-autocomplete
-                  clearable
-                  dense
-                  auto-select-first
-                  color="indigo"
-                  :label="$t('Branch')"
-                  v-model="territory"
-                  :items="territorys"
-                  background-color="white"
-                  :no-data-text="$t('Branch not found')"
-                  hide-details
-                />
-              </v-col>
-              <v-col cols="6">
-                <v-text-field
-                  dense
-                  color="indigo"
-                  :label="$t('City') + ' *'"
-                  background-color="white"
-                  hide-details
-                  v-model="city"
-                  :rules="[(v) => !!v || $t('City is required')]"
-                />
-              </v-col>
-              <v-col cols="6">
-                <v-checkbox
-                  v-model="custom_b2c"
-                  :label="$t('ZATCA Type: Simplified (B2C)')"
-                  :true-value="1"
-                  :false-value="0"
-                  color="indigo"
-                />
-              </v-col>
-              <v-col cols="6">
-                <v-text-field
-                  dense
-                  color="indigo"
-                  :label="$t('Address line 1')"
-                  background-color="white"
-                  hide-details
-                  v-model="address_line1"
-                />
-              </v-col>
-              <v-col cols="6">
-                <v-text-field
-                  dense
-                  color="indigo"
-                  :label="$t('Address line 2')"
-                  background-color="white"
-                  hide-details
-                  v-model="address_line2"
-                />
-              </v-col>
-              <v-col cols="6">
-                <v-text-field
-                  dense
-                  color="indigo"
-                  :label="$t('Post code')"
-                  background-color="white"
-                  hide-details
-                  v-model="pincode"
-                  :maxlength="5"
-                  @blur="validatePincode"
-                  :error="!isValidPincode"
-                />
-              </v-col>
             </v-row>
           </v-container>
         </v-card-text>
@@ -408,58 +294,7 @@ export default {
           });
           return;
         }
-        if (
-          this.tax_id === "" &&
-          this.group &&
-          this.group !== "Retail customers - عميل تجزئة"
-        ) {
-          this.eventBus.emit("show_message", {
-            text: __("Tax ID cannot be empty!"),
-            color: "error",
-          });
-          return;
-        }
-        if (!this.referral_code) {
-          this.eventBus.emit("show_message", {
-            text: __("Referral code is mandatory for customers!"),
-            color: "error",
-          });
-          return;
-        }
-
-        if (this.address_line1 && !this.city) {
-          this.eventBus.emit("show_message", {
-            text: __("City is mandatory when address is provided!"),
-            color: "error",
-          });
-          return;
-        }
-
-        if (
-          this.custom_building_number &&
-          !/^\d{4}$/.test(this.custom_building_number)
-        ) {
-          this.eventBus.emit("show_message", {
-            text: __("Building number must be exactly 4 digits!"),
-            color: "error",
-          });
-          return;
-        }
-
-        if (this.pincode && !/^\d{5}$/.test(this.pincode)) {
-          this.eventBus.emit("show_message", {
-            text: __("Pincode must be exactly 5 digits!"),
-            color: "error",
-          });
-          return;
-        }
-        if (!this.group) {
-          this.eventBus.emit("show_message", {
-            text: __("Customer Group is mandatory!"),
-            color: "error",
-          });
-          return;
-        }
+   
 
 
         frappe.call({

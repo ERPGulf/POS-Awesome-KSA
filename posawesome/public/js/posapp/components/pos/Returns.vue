@@ -174,6 +174,6 @@ export default {
       this.dialog_data = '';
       this.selected = [];
     });
-  },
+  },
 };
 </script>

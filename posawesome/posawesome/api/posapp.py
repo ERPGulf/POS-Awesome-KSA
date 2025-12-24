@@ -727,7 +727,7 @@ def get_shipping_rule_names():
         """,
         as_dict=1,
     )
-    # frappe.log_error("shipping_rules",shipping_rules)
+    frappe.log_error("shipping_rules",shipping_rules)
 
     return shipping_rules
 
@@ -738,10 +738,7 @@ def update_invoice(data):
      
     # Added by Farook for adding sales_invoice_item for  return invoice
     if data.get("is_return") and data.get("return_against"):
-        # Load the original invoice
         original_invoice = frappe.get_doc("Sales Invoice", data["return_against"])
-        
-        # Map original item codes to their names
         original_items = {item.item_code: item.name for item in original_invoice.items}
 
         for item in data.get("items", []):
@@ -764,43 +761,24 @@ def update_invoice(data):
     invoice_doc.calculate_taxes_and_totals()
     # invoice_doc.rounded_total = frappe.utils.rounded(invoice_doc.grand_total)
     for item in invoice_doc.items:
-        # discount_level = cint(frappe.get_value("Customer", invoice_doc.customer, "custom_discount_level") or 0)
         customer = frappe.get_doc("Customer", invoice_doc.customer)
         customer_group = customer.get("customer_group") or ""
-        # profile_type = frappe.get_value("POS Profile", invoice_doc.pos_profile, "custom_profile_type")
         wholesale_price_list = frappe.get_value("POS Profile", invoice_doc.pos_profile, "selling_price_list")
 
         for item in invoice_doc.items:
-            # Fetch wholesale rates from Item Price
             item_price_doc = frappe.get_all("Item Price",
                 filters={
                     "item_code": item.item_code,
                     "price_list": wholesale_price_list
                 },
-                # fields=["wholesale_rate", "wholesale_rate2", "wholesale_rate3", "price_list_rate"]
                 fields=["price_list_rate"]
             )
 
             item_rates = item_price_doc[0] if item_price_doc else {}
-            # wholesale_rate = item_rates.get("wholesale_rate") or 0
-            # wholesale_rate2 = item_rates.get("wholesale_rate2") or 0
-            # wholesale_rate3 = item_rates.get("wholesale_rate3") or 0
             original_rate = item_rates.get("price_list_rate") or 0
-
 
             # Apply rate logic
             new_rate = original_rate  # fallback
-            # if profile_type == "Wholesale Customer":
-                # if discount_level == 1 and wholesale_rate:
-                #     new_rate = wholesale_rate
-                # elif discount_level == 2 and wholesale_rate2:
-                #     new_rate = wholesale_rate2
-            # elif (
-            #     profile_type == "Distribution Eastern"
-            #     # and customer_group.strip() == "Retail customers center - عملاء تجزئة-مراكز"
-            #     and wholesale_rate3
-            # ):
-            #     new_rate = wholesale_rate3
 
             # Set the chosen rate
             item.rate = new_rate
@@ -812,51 +790,20 @@ def update_invoice(data):
 
             add_taxes_from_tax_template(item, invoice_doc)
 
-        #         # Only set the rate from backend if not already set by frontend
-        # # if not item.rate or item.rate == 0:
-        # wholesale_profiles = [
-        #     "Wholesale POS",
-        #     "Wholesale - Western",
-        #     "Wholesale - Eastern",
-        #     "Wholesale - Central",
-        #     "Orange Station POS",
-        #     "Wholesale Central 2 POS",
-        # ]
-        # if invoice_doc.pos_profile in wholesale_profiles:
-        #     # frappe.log_error("Wholesale Profile1", invoice_doc.pos_profile)
-        #     # Get customer's custom discount level
-        #     discount_level = frappe.get_value("Customer", invoice_doc.customer, "custom_discount_level") or 0
-
-        #     # Get price list and field to use
-        #     wholesale_price_list = frappe.get_value("POS Profile", invoice_doc.pos_profile, "selling_price_list")
-
-        #     # Decide rate field based on level
-        #     rate_field = "wholesale_rate"  # default
-        #     if discount_level == 2:
-        #         rate_field = "wholesale_rate2"
-
-        #     # Fetch the correct rate
-        #     wholesale_rate = frappe.get_value(
-        #         "Item Price",
-        #         {
-        #             "item_code": item.item_code,
-        #             "price_list": wholesale_price_list,
-        #         },
-        #         rate_field,
-        #     ) or 0
-        #     # frappe.log_error("Wholesale Rate for item", wholesale_rate)
-
-        #     # Assign rate fields
-        #     item.rate = wholesale_rate
-        #     item.price_list_rate = wholesale_rate
-        #     item.base_rate = wholesale_rate
-        #     item.base_price_list_rate = wholesale_rate
-        #     item.amount = item.rate * item.qty
-        #     item.base_amount = item.base_rate * item.qty
-        #     # frappe.log_error("Wholesale Rate for item", item.rate)
-
         # add_taxes_from_tax_template(item, invoice_doc)
+    # invoice_doc.calculate_taxes_and_totals()
+    # Remove shipping charge for return invoices
+    if invoice_doc.is_return and invoice_doc.shipping_rule:
+        new_taxes = []
+        for tax in invoice_doc.taxes:
+            if not (tax.charge_type == "Actual"):
+                new_taxes.append(tax)
+        frappe.log_error("new_taxes",new_taxes)
+        invoice_doc.set("taxes", new_taxes)
+        invoice_doc.shipping_rule = None  
+
     invoice_doc.calculate_taxes_and_totals()
+    
     if frappe.get_value("POS Profile", invoice_doc.pos_profile, "posa_tax_inclusive"):
         if invoice_doc.get("taxes"):
             for tax in invoice_doc.taxes:
@@ -871,9 +818,6 @@ def update_invoice(data):
     invoice_doc.discount_amount = data.get("discount_amount")
     invoice_doc.rounded_total = frappe.utils.rounded(invoice_doc.grand_total)
     
-    
-
-
     if invoice_doc.is_return:
         _add_payments_to_return_invoice(invoice_doc)  # This will modify invoice_doc locally
 
@@ -915,7 +859,13 @@ def update_invoice(data):
     frappe.db.commit()
     if(invoice_doc.shipping_rule):
         apply_shipping_charges(invoice_doc)
+    # invoice_doc.rounded_total = frappe.utils.rounded(invoice_doc.grand_total)
     invoice_doc.save()
+    # frappe.log_error(
+    #     title="rounded_total",
+    #     message=str(invoice_doc.rounded_total)
+    # )
+    # frappe.log_error("doc",frappe.as_json(invoice_doc.as_dict(), indent=2))
     return invoice_doc
 
 
@@ -1218,10 +1168,16 @@ def submit_invoice(invoice, data):
             
         if invoice_doc.is_return:
             invoice_doc.update_outstanding_for_self = 0
+        user = frappe.session.user 
+        value = frappe.db.get_value(
+            "GEIdea Device Map",
+            {"user": user},
+            "custom_device_enabled"
+        )
         for p in invoice_doc.payments:
-            if p.mode_of_payment and p.mode_of_payment.lower() == "bank draft":
-                if not p.custom_transaction_id and data.get("bank_draft_transaction_id"):
-                    p.custom_transaction_id = data["bank_draft_transaction_id"]
+            if p.mode_of_payment and p.mode_of_payment.lower() == "credit card" and value=="1":
+                if not p.custom_transaction_id and data.get("credit_card_transaction_id"):
+                    p.custom_transaction_id = data["credit_card_transaction_id"]
 
 
         invoice_doc.submit()
@@ -1229,6 +1185,17 @@ def submit_invoice(invoice, data):
             invoice_doc, data, is_payment_entry, total_cash, cash_account, payments
         )
     return {"name": invoice_doc.name, "status": invoice_doc.docstatus}
+
+@frappe.whitelist()
+def get_shipping_charge(invoice_name):
+    invoice = frappe.get_doc("Sales Invoice", invoice_name)
+
+    shipping_charge = 0
+    for tax in invoice.taxes:
+        if tax.charge_type == "Actual":
+            shipping_charge += tax.tax_amount
+    frappe.log_error("shipping_charge ",shipping_charge)
+    return {"shipping_charge": shipping_charge}
 
 
 def set_batch_nos_for_bundels(doc, warehouse_field, throw=False):
@@ -1730,26 +1697,22 @@ def get_wholesale_rate(item_code, price_list, pos_profile=None):
     return wh_rate[0].rate if wh_rate and wh_rate[0].rate else 0
 
 
-# @frappe.whitelist()
-# def get_wholesale_rate(item_code,price_list):
-#     wh_rate = frappe.db.sql(
-#         """select wholesale_rate
-#         from `tabItem Price`
-#         where item_code = %s and price_list = %s
-#         """,
-#         (item_code, price_list),
-#         as_dict=1,
-#     )
-#     frappe.log_error("wh_rate",wh_rate)
-#     return wh_rate[0].wholesale_rate or 0 if wh_rate else 0
-
-
 @frappe.whitelist()
 def apply_shipping_charges(invoice_doc):
+    # Proper ERPNext shipping apply call
+    shipping_rule_name = invoice_doc.shipping_rule
+    if shipping_rule_name:
+        sr = frappe.get_doc("Shipping Rule", shipping_rule_name)
+        sr.apply(invoice_doc)
 
-
-    invoice_doc.apply_shipping_charge()
+    invoice_doc.calculate_taxes_and_totals()
     return "done"
+
+
+# @frappe.whitelist()
+# def apply_shipping_charges(invoice_doc):
+#     invoice_doc.apply_shipping_charge()
+#     return "done"
 
 @frappe.whitelist()
 def create_customer(
@@ -1793,21 +1756,11 @@ def create_customer(
                 "company": frappe.defaults.get_user_default("Company")
             }
         )
-        if customer_group:
-            customer.customer_group = customer_group
+        # if customer_group:
+        #     customer.customer_group = customer_group
+        customer.customer_group = "All Customer Groups"
         if territory:
             customer.territory = territory
-        # if isinstance(custom_b2c, str):
-        #     custom_b2c = custom_b2c.lower() in ("true", "1", "yes")
-
-        # if custom_b2c:
-            # customer.custom_b2c = 1 if custom_b2c else 0
-        # if custom_buyer_id_type:
-        #     customer.custom_buyer_id_type = custom_buyer_id_type
-        # if custom_buyer_id:
-        #     customer.custom_buyer_id = custom_buyer_id
-        # if customer_name_in_arabic:
-            # customer.customer_name_in_arabic = customer_name_in_arabic
         customer.save(ignore_permissions=True)
 
         if address_line1:
@@ -2092,7 +2045,7 @@ def get_customer_address(customer_name):
 
 @frappe.whitelist()
 def search_invoices_for_return(invoice_name, company):
-    frappe.log_error("1", invoice_name)
+    # frappe.log_error("1", invoice_name)
     invoices_list = frappe.get_list(
         "Sales Invoice",
         filters={
@@ -2105,7 +2058,7 @@ def search_invoices_for_return(invoice_name, company):
         limit_page_length=0,
         order_by="customer",
     )
-    frappe.log_error("2", invoice_name)
+    # frappe.log_error("2", invoice_name)
     data = []
 
     for invoice in invoices_list:
@@ -2803,7 +2756,7 @@ def _add_payments_to_return_invoice(invoice_doc):
                 "allow_in_returns": payment_method.allow_in_returns,
         })
     # frappe.log_error("amount 1", invoice_doc.rounded_total)
-    frappe.log_error("amount 2", invoice_doc.payments[0].amount)
+    # frappe.log_error("amount 2", invoice_doc.payments[0].amount)
 
 
 # @frappe.whitelist()
@@ -2870,18 +2823,105 @@ def get_wholesale_rates(pos_profile, item_code):
 
     return     
 
- 
 @frappe.whitelist()
-def bank_draft_payment(invoice_name, customer, amount):
+def get_returned_item_note_options():
+    """
+    Returns dropdown options from the 'Returned Item Note' field in Sales Invoice Doctype.
+    """
+    meta = frappe.get_meta("Sales Invoice")
+    field = next((f for f in meta.fields if f.fieldname == "custom_returned_item_note"), None)
+    if not field or not field.options:
+        return []
     
-    # url = "https://sahana.erpgulf.com:3768/api/method/geidea_erpgulf.geidea_erpgulf.posaw_test.send_request_to_device"
-    parsed_url = frappe.local.conf.host_name
-    frappe.log_error("parsed_url",parsed_url)
-    path = "/api/method/geidea_erpgulf.geidea_erpgulf.posaw_test.send_request_to_device"
-    url = f"{parsed_url.rstrip('/')}{path}" 
-    frappe.log_error("url",url)
+    return [opt.strip() for opt in field.options.split('\n') if opt.strip()]
+
+ 
+# @frappe.whitelist()
+# def bank_draft_payment(invoice_name, customer, amount):
+    
+#     # url = "https://sahana.erpgulf.com:3768/api/method/geidea_erpgulf.geidea_erpgulf.posaw_test.send_request_to_device"
+#     parsed_url = frappe.local.conf.host_name
+#     frappe.log_error("parsed_url",parsed_url)
+#     path = "/api/method/geidea_erpgulf.geidea_erpgulf.posaw_test.send_request_to_device"
+#     url = f"{parsed_url.rstrip('/')}{path}" 
+#     frappe.log_error("url",url)
 
     
+#     # Generate a unique UUID (string)
+#     unique_id = str(uuid.uuid4())
+
+#     payload = {
+#         "user": frappe.session.user,
+#         "amount": amount,
+#         "invoice_number": invoice_name,
+#         "uuid": unique_id,
+#         "customer": customer,
+#         "callback_url":parsed_url
+#     }
+#     frappe.log_error("payload",payload)
+
+#     r = requests.post(url, json=payload, timeout=(10, 120)) 
+
+
+#     try:
+#         response_json = r.json()   # ✅ actually call .json()
+#     except ValueError:
+#         response_json = {"error": "Invalid JSON", "text": r.text}
+
+#     # Log raw response for debugging
+#     frappe.log_error(f"Bank Draft API Response: {r.status_code}", response_json)
+#     # data = response_json.get("message") or response_json
+#     # if data and data.get("final_Status") == 1 and data.get("transaction_id"):
+#     #     invoice_doc = frappe.get_doc("Sales Invoice", invoice_name)
+#     #     for p in invoice_doc.payments:
+#     #         if (
+#     #             p.mode_of_payment
+#     #             and p.mode_of_payment.lower() == "bank draft"
+#     #             and not p.custom_transaction_id  # only update if empty
+#     #         ):
+#     #             p.custom_transaction_id = data["transaction_id"]
+#     #     invoice_doc.save(ignore_permissions=True)
+#     #     frappe.db.commit()
+
+#     return response_json
+
+@frappe.whitelist()
+def is_device_enabled():
+    user = frappe.session.user 
+    value = frappe.db.get_value(
+        "GEIdea Device Map",
+        {"user": user},
+        "custom_device_enabled"
+    )
+    return int(value or 0)
+
+@frappe.whitelist()
+def credit_card_payment(invoice_name, customer, amount):
+    import uuid
+    import requests
+    from datetime import datetime
+
+    parsed_url = frappe.local.conf.host_name
+    frappe.log_error("parsed_url", parsed_url)
+
+    path = "/api/method/geidea_erpgulf.geidea_erpgulf.posaw_test.send_request_to_device"
+    url = f"{parsed_url.rstrip('/')}{path}"
+    frappe.log_error("url", url)
+    invoice_doc = frappe.get_doc("Sales Invoice", invoice_name)
+    is_return = 1 if invoice_doc.get("is_return") else 0
+    original_invoice_doc = invoice_doc
+    if is_return and invoice_doc.get("return_against"):
+        original_invoice_doc = frappe.get_doc("Sales Invoice", invoice_doc.return_against)
+
+    transaction_id = None
+    for p in original_invoice_doc.payments:
+        if p.mode_of_payment and p.mode_of_payment.lower() == "credit card" and p.get("custom_transaction_id"):
+            transaction_id = p.custom_transaction_id
+            break
+    
+    if is_return==1 and not transaction_id:
+        frappe.throw("Transaction id is mandatory for return invoices")
+
     # Generate a unique UUID (string)
     unique_id = str(uuid.uuid4())
 
@@ -2891,31 +2931,23 @@ def bank_draft_payment(invoice_name, customer, amount):
         "invoice_number": invoice_name,
         "uuid": unique_id,
         "customer": customer,
-        "callback_url":parsed_url
+        "callback_url": parsed_url,
+        "refund": is_return,                     
+        "transaction_id": transaction_id or ""   
     }
-    frappe.log_error("payload",payload)
-
-    r = requests.post(url, json=payload, timeout=(10, 120)) 
-
+    
+    if is_return:
+        posting_date_str = datetime.strptime(str(original_invoice_doc.posting_date), "%Y-%m-%d").strftime("%d%m%Y")
+        payload["posting_date"] = posting_date_str
+        
+    frappe.log_error("Payload", payload)
 
     try:
-        response_json = r.json()   # ✅ actually call .json()
-    except ValueError:
-        response_json = {"error": "Invalid JSON", "text": r.text}
-
-    # Log raw response for debugging
-    frappe.log_error(f"Bank Draft API Response: {r.status_code}", response_json)
-    # data = response_json.get("message") or response_json
-    # if data and data.get("final_Status") == 1 and data.get("transaction_id"):
-    #     invoice_doc = frappe.get_doc("Sales Invoice", invoice_name)
-    #     for p in invoice_doc.payments:
-    #         if (
-    #             p.mode_of_payment
-    #             and p.mode_of_payment.lower() == "bank draft"
-    #             and not p.custom_transaction_id  # only update if empty
-    #         ):
-    #             p.custom_transaction_id = data["transaction_id"]
-    #     invoice_doc.save(ignore_permissions=True)
-    #     frappe.db.commit()
+        r = requests.post(url, json=payload, timeout=(10, 120))
+        response_json = r.json()
+    except Exception as e:
+        frappe.log_error("Credit Card API Error", str(e))
+        response_json = {"error": str(e)}
+    frappe.log_error(f"Credit Card API Response: {r.status_code}", response_json)
 
     return response_json
