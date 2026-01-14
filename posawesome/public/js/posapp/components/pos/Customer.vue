@@ -1,28 +1,43 @@
 <template>
   <div :dir="$i18n.locale === 'ar' ? 'rtl' : 'ltr'">
-    <v-autocomplete
-      density="compact"
-      clearable
-      auto-select-first
-      variant="outlined"
-      color="primary"
-      :label="$t('Customer')"
-      v-model="customer"
-      :items="filteredCustomers"
-      v-model:search="searchQuery"
-      item-title="customer_name"
-      item-value="name"
-      bg-color="white"
-      :no-data-text="$t('Customers not found')"
-      hide-details
-      :custom-filter="customFilter"
-      :disabled="readonly"
-      append-icon="mdi-plus"
-      @click:append="new_customer"
-      prepend-inner-icon="mdi-account-edit"
-      @click:prepend-inner="edit_customer"
-    >
-    </v-autocomplete>
+  <v-autocomplete
+    density="compact"
+    clearable
+    auto-select-first
+    variant="outlined"
+    color="primary"
+    :label="$t('Customer')"
+    v-model="customer"
+    :items="filteredCustomers"
+    v-model:search="searchQuery"
+    @update:search="searchQuery = $event"
+    item-title="customer_name"
+    item-value="name"
+    bg-color="white"
+    :no-data-text="$t('Customers not found')"
+    hide-details
+    :custom-filter="customFilter"
+    :disabled="readonly"
+    append-icon="mdi-plus"
+    @click:append="new_customer"
+    prepend-inner-icon="mdi-account-edit"
+    @click:prepend-inner="edit_customer"
+  >
+
+    <template v-slot:no-data>
+      <v-btn
+        v-if="searchQuery"
+        block
+        color="success"
+        class="mt-2"
+        @click="add_from_search"
+      >
+        + ADD CUSTOMER ({{ searchQuery }})
+      </v-btn>
+    </template>
+
+  </v-autocomplete>
+
 
     <div class="mb-8">
       <NewCustomer />
@@ -75,6 +90,13 @@ export default {
     },
   },
   methods: {
+
+    add_from_search() {
+      this.eventBus.emit("open_new_customer");
+      this.$nextTick(() => {
+        this.eventBus.emit("prefill_phone", this.searchQuery);
+      });
+    },
     get_customer_names() {
       const vm = this;
 

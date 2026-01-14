@@ -607,7 +607,7 @@
               clearable
               variant="outlined"
               color="primary"
-              :label="$t('Sales Person') + ' *'"
+              :label="$t('Sales Person')"
               v-model="sales_person"
               :items="sales_persons"
               item-title="sales_person_name"
@@ -852,6 +852,9 @@ export default {
       }
     },
 
+
+
+
     update_item_rate(item) {
       if (localStorage.items_storage) {
         try {
@@ -864,7 +867,7 @@ export default {
 
       if (localItem) {
         item.original_rate = parseFloat(localItem.rate || 0); // add fallback
-      }
+     }
 
       const customerGroup = this.customer_group || "";
       const vm = this;
@@ -878,7 +881,7 @@ export default {
       item.base_price_list_rate = item.rate;
       item.base_amount = item.amount;
 
-      this.recalculate_totals();
+    //  this.recalculate_totals();
     },
 
     back_to_invoice() {
@@ -908,9 +911,7 @@ export default {
           });
           return;
         }
-      if (!this.is_credit_sale) {
         if (
-          this.is_cashback &&
           this.total_payments !==
             (this.invoice_doc.rounded_total || this.invoice_doc.grand_total)
         ) {
@@ -921,7 +922,6 @@ export default {
           frappe.utils.play_sound("error");
           return;
         }
-      }
       if (this.is_credit_sale) {
         if (this.total_payments !== 0) {
           this.eventBus.emit("show_message", {
@@ -933,14 +933,14 @@ export default {
         }
       }
 
-      if (!this.sales_person) {
-        this.eventBus.emit("show_message", {
-          text: this.$t("Please select a Sales Person before submitting."),
-          color: "error",
-        });
-        frappe.utils.play_sound("error");
-        return;
-      }
+      //if (!this.sales_person) {
+      //  this.eventBus.emit("show_message", {
+      //    text: this.$t("Please select a Sales Person before submitting."),
+      //    color: "error",
+      //  });
+      //frappe.utils.play_sound("error");
+      // return;
+      //}
       if (!this.invoice_doc.is_return && this.total_payments < 0) {
         this.eventBus.emit("show_message", {
           text: `Payments not correct`,
@@ -1135,7 +1135,7 @@ export default {
       this.invoice_doc.payments.forEach((p) => {
         p.amount =
           p.idx === payment.idx
-            ? this.invoice_doc.rounded_total || this.invoice_doc.grand_total
+            ? this.invoice_doc.grand_total
             : 0;
       });
 
@@ -1146,6 +1146,7 @@ export default {
       }
 
     },
+    
 
     set_rest_amount(idx) {
       this.invoice_doc.payments.forEach((payment) => {
@@ -1482,13 +1483,41 @@ export default {
     computed_diff_payment() {
       return this.diff_payment;
     },
-    total_payments() {
-      let total = 0;
-      total = parseFloat(this.invoice_doc.loyalty_amount);
-      total +=this.invoice_doc.rounded_total;
-      total += this.flt(this.redeemed_customer_credit);
 
-      if (!this.is_cashback) total = 0;
+
+      total_payments() {
+      let total = 0;
+
+      //const wholesaleProfiles = [
+      //  "Wholesale POS",
+      //  "Wholesale - Western",
+      // "Wholesale - Eastern",
+      //  "Wholesale - Central",
+      //  "Orange Station POS",
+      //  "Wholesale Central 2 POS",
+      //];
+
+      //const isWholesale = wholesaleProfiles.includes(this.pos_profile?.name);
+
+      //if (isWholesale) {
+      //  if (this.invoice_doc && this.invoice_doc.payments) {
+      //    this.invoice_doc.payments.forEach((payment) => {
+      //      total += this.flt(payment.amount);
+      //    });
+      //  }
+      //} else {
+        total = parseFloat(this.invoice_doc.loyalty_amount);
+
+        if (this.invoice_doc && this.invoice_doc.payments) {
+          this.invoice_doc.payments.forEach((payment) => {
+            total += this.flt(payment.amount);
+          });
+        }
+
+        total += this.flt(this.redeemed_customer_credit);
+
+        if (!this.is_cashback) total = 0;
+      //}
 
       return this.flt(total, this.currency_precision);
     },
@@ -1723,16 +1752,16 @@ export default {
       immediate: false,
     },
 
-    "invoice_doc.items": {
-      async handler(newVal) {
-        if (!newVal || !Array.isArray(newVal)) return;
+    //"invoice_doc.items": {
+    //  async handler(newVal) {
+    //    if (!newVal || !Array.isArray(newVal)) return;
 
-        await Promise.all(newVal.map((item) => this.update_item_rate(item)));
-        this.recalculate_totals();
-      },
-      deep: true,
-      immediate: true,
-    },
+    //   await Promise.all(newVal.map((item) => this.update_item_rate(item)));
+    //    this.recalculate_totals();
+    //  },
+    //  deep: true,
+    //  immediate: true,
+    //},
 
     loyalty_amount(value) {
       if (value > this.available_pioints_amount) {

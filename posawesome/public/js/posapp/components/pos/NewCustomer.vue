@@ -340,6 +340,10 @@ export default {
   },
 
   created() {
+    this.eventBus.on("prefill_phone", (phone) => {
+      this.mobile_no = phone; 
+    });
+
     this.eventBus.on("open_new_customer", () => {
       this.customerDialog = true;
       this.getCustomerGroups();

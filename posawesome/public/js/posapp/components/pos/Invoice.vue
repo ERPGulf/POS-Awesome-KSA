@@ -58,58 +58,6 @@
       <v-row
         align="center"
         class="items px-2 py-1 mt-0 pt-0"
-        v-if="pos_profile.posa_use_delivery_charges"
-      >
-        <v-col cols="8" class="pb-0 mb-0 pr-0 pt-0">
-          <v-autocomplete
-            density="compact"
-            clearable
-            auto-select-first
-            variant="outlined"
-            color="primary"
-            :label="$t('Delivery Charges')"
-            v-model="selected_delivery_charge"
-            :items="delivery_charges"
-            item-title="name"
-            item-value="name"
-            return-object
-            bg-color="white"
-            :no-data-text="$t('Charges not found')"
-            hide-details
-            :customFilter="deliveryChargesFilter"
-            :disabled="readonly"
-            @update:model-value="update_delivery_charges()"
-          >
-            <template v-slot:item="{ props, item }">
-              <v-list-item v-bind="props">
-                <v-list-item-title
-                  class="text-primary text-subtitle-1"
-                  v-html="item.raw.name"
-                ></v-list-item-title>
-                <v-list-item-subtitle
-                  v-html="`Rate: ${item.raw.rate}`"
-                ></v-list-item-subtitle>
-              </v-list-item>
-            </template>
-          </v-autocomplete>
-        </v-col>
-        <v-col cols="4" class="pb-0 mb-0 pt-0">
-          <v-text-field
-            density="compact"
-            variant="outlined"
-            color="primary"
-            :label="$t('Delivery Charges Rate')"
-            bg-color="white"
-            hide-details
-            :model-value="formatCurrency(delivery_charges_rate)"
-            :prefix="currencySymbol(pos_profile.currency)"
-            disabled
-          ></v-text-field>
-        </v-col>
-      </v-row>
-      <v-row
-        align="center"
-        class="items px-2 py-1 mt-0 pt-0"
         v-if="pos_profile.posa_allow_change_posting_date"
       >
         <v-col
@@ -616,15 +564,6 @@
             <v-col
               cols="6"
               class="pa-1"
-              v-if="
-                (pos_profile.name != 'Wholesale POS' &&
-                  pos_profile.name != 'Wholesale - Western' &&
-                  pos_profile.name != 'Wholesale - Eastern' &&
-                  pos_profile.name != 'Wholesale - Central' &&
-                  pos_profile.name != 'Orange Station POS' &&
-                  pos_profile.name != 'Wholesale Central 2 POS') ||
-                frappe.user.has_role('Wholesale Manager')
-              "
             >
               <v-text-field
                 v-model="discount_amount"
@@ -650,15 +589,7 @@
             <v-col
               cols="6"
               class="pa-1"
-              v-if="
-                (pos_profile.name != 'Wholesale POS' &&
-                  pos_profile.name != 'Wholesale - Western' &&
-                  pos_profile.name != 'Wholesale - Eastern' &&
-                  pos_profile.name != 'Wholesale - Central' &&
-                  pos_profile.name != 'Orange Station POS' &&
-                  pos_profile.name != 'Wholesale Central 2 POS') ||
-                frappe.user.has_role('Wholesale Manager')
-              "
+
             >
               <v-text-field
                 v-model="discount_percentage_amount"
@@ -710,6 +641,7 @@
             <v-col
               cols="6"
               class="pa-1"
+              v-if="pos_profile.custom_use_shipping_rule"
             >
             <v-autocomplete
               v-model="shipping_rule"
@@ -970,13 +902,11 @@ export default {
       }
     },
     update_item_rate(item) {
-      const level = this.custom_discount_level;
-      const profileType = this.pos_profile?.custom_profile_type || "";
       const customerGroup = this.customer_info?.customer_group || "";
 
-      const localItems = JSON.parse(
-        localStorage.getItem("items_storage") || "[]"
-      );
+      //const localItems = JSON.parse(
+      //  localStorage.getItem("items_storage") || "[]"
+      //);
       const localItem = localItems.find((i) => i.item_code === item.item_code);
       if (localItem) {
        
@@ -1127,7 +1057,7 @@ export default {
       if (index === -1 || this.new_line) {
         const new_item = {
           ...this.get_new_item(item),
-          rate: item.rate, 
+          //rate: item.rate, 
         };
 
         if (item.has_serial_no && item.to_set_serial_no) {
@@ -1809,11 +1739,12 @@ export default {
             }
           }
         }
-        if (this.stock_settings.allow_negative_stock != 1) {
+
+        if (!vm.pos_profile.custom__allow_negative_stock && this.stock_settings.allow_negative_stock != 1) {
           if (
-            this.invoiceType == "Invoice" &&
-            ((item.is_stock_item && item.stock_qty && !item.actual_qty) ||
-              (item.is_stock_item && item.stock_qty > item.actual_qty))
+            item.qty > item_av_qty &&
+            !item.item_code.includes("PRODUCT KIT") &&
+            !this.invoice_doc.is_return
           ) {
             vm.eventBus.emit("show_message", {
               text: this.$t(
@@ -1863,7 +1794,7 @@ export default {
           }
         }
         if (item.has_batch_no) {
-          if (item.stock_qty > item.actual_batch_qty) {
+          if (!vm.pos_profile.custom__allow_negative_stock && item.stock_qty > item.actual_batch_qty) {
             vm.eventBus.emit("show_message", {
               text: this.$t(
                 "The existing batch quantity of item {0} is not enough",
@@ -1887,27 +1818,6 @@ export default {
           }
         }
 
-        if (
-          this.pos_profile.name != "Wholesale POS" &&
-          this.pos_profile.name != "Wholesale - Western" &&
-          this.pos_profile.name != "Wholesale - Eastern" &&
-          this.pos_profile.name != "Wholesale - Central" &&
-          this.pos_profile.name != "Orange Station POS" &&
-          this.pos_profile.name != "Wholesale Central 2 POS" &&
-          this.pos_profile.name != "Website POS" &&
-          item_av_qty <= 0 &&
-          !item.item_code.includes("PRODUCT KIT") &&
-          !this.invoice_doc.is_return
-        ) {
-          vm.eventBus.emit("show_message", {
-            text: this.$t("The existing qty {0} for item {1} is invalid", [
-              item_av_qty,
-              item.item_name,
-            ]),
-            color: "error",
-          });
-          value = false;
-        }
 
         if (this.invoice_doc.is_return) {
           if (this.subtotal >= 0) {
@@ -2049,7 +1959,7 @@ export default {
         args: {
           warehouse: this.pos_profile.warehouse,
           doc: this.get_invoice_doc(),
-          price_list: this.pos_profile.price_list,
+          price_list: this.pos_profile.selling_price_list,
           item: {
             item_code: item.item_code,
             customer: this.customer,
@@ -2077,7 +1987,6 @@ export default {
         callback: function (r) {
           if (r.message) {
             const data = r.message;
-
             if (data.batch_no_data) {
               item.batch_no_data = data.batch_no_data;
             }

@@ -135,7 +135,7 @@ export default {
           invoice_name: vm.invoice_name,
           company: vm.company,
         },
-        async: false,
+        async: true,
         callback: function (r) {
           if (r.message) {
             vm.dialog_data = r.message;

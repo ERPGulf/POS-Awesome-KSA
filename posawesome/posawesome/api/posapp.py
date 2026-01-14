@@ -29,6 +29,7 @@ from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
     get_loyalty_program_details_with_points,
 )
+from erpnext.stock.get_item_details import get_price_list_rate_for
 from posawesome.posawesome.doctype.pos_coupon.pos_coupon import check_coupon_code
 from posawesome.posawesome.doctype.delivery_charges.delivery_charges import (
     get_applicable_delivery_charges as _get_applicable_delivery_charges,
@@ -625,7 +626,7 @@ def get_customer_names(pos_profile):
 def get_default_sales_person():
     user = frappe.session.user
     sales_person = frappe.get_value("Sales Person", {"name": user, "enabled": 1}, ["name", "sales_person_name"])
-    frappe.log_error("get_default_sales_person user", sales_person)
+    # frappe.log_error("get_default_sales_person user", sales_person)
     return sales_person
 
 
@@ -645,11 +646,11 @@ def get_default_sales_person():
 @frappe.whitelist()
 def get_sales_person_names():
     user = frappe.session.user
-    frappe.log_error("get_sales_person_names user", user)
+    # frappe.log_error("get_sales_person_names user", user)
 
     # Step 1: Get employee based on current user
     employee = frappe.get_value("Employee", {"user_id": user, "status": "Active"}, "name")
-    frappe.log_error("employee for user", employee)
+    # frappe.log_error("employee for user", employee)
 
     # Step 2: Get Sales Person linked to that employee
     default_sales_person = None
@@ -755,40 +756,59 @@ def update_invoice(data):
         invoice_doc.update(data)
     else:
         invoice_doc = frappe.get_doc(data)
+        
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
     invoice_doc.set_missing_values()
-    invoice_doc.calculate_taxes_and_totals()
+    # invoice_doc.calculate_taxes_and_totals()
     # invoice_doc.rounded_total = frappe.utils.rounded(invoice_doc.grand_total)
+    # for item in invoice_doc.items:
+    
+    customer = frappe.get_doc("Customer", invoice_doc.customer)
+    customer_group = customer.get("customer_group") or ""
+    price_list = frappe.get_value("POS Profile", invoice_doc.pos_profile, "selling_price_list")
+    
     for item in invoice_doc.items:
-        customer = frappe.get_doc("Customer", invoice_doc.customer)
-        customer_group = customer.get("customer_group") or ""
-        wholesale_price_list = frappe.get_value("POS Profile", invoice_doc.pos_profile, "selling_price_list")
+        item.base_rate = item.rate
+        item.base_price_list_rate = item.price_list_rate
+        item.amount = item.rate * item.qty
+        item.base_amount = item.amount
 
-        for item in invoice_doc.items:
-            item_price_doc = frappe.get_all("Item Price",
-                filters={
-                    "item_code": item.item_code,
-                    "price_list": wholesale_price_list
-                },
-                fields=["price_list_rate"]
-            )
 
-            item_rates = item_price_doc[0] if item_price_doc else {}
-            original_rate = item_rates.get("price_list_rate") or 0
+        # item.rate = rate
+        # item.price_list_rate = rate
+        # item.base_rate = rate
+        # item.base_price_list_rate = rate
+        # item.amount = rate * item.qty
+        # item.base_amount = rate * item.qty
 
-            # Apply rate logic
-            new_rate = original_rate  # fallback
+    invoice_doc.calculate_taxes_and_totals()
+    invoice_doc.rounded_total = frappe.utils.rounded(invoice_doc.grand_total)
+    invoice_doc.base_rounded_total = invoice_doc.rounded_total
+                
+        # for item in invoice_doc.items:
+        #     item_price_doc = frappe.get_all("Item Price",
+        #         filters={
+        #             "item_code": item.item_code,
+        #             "price_list": price_list,
+        #             "valid_upto": ["in", ["", None]]
+        #         },
+        #         fields=["price_list_rate"],
+        #         order_by="valid_from desc, creation desc",
+        #         limit=1
+        #     )
 
-            # Set the chosen rate
-            item.rate = new_rate
-            item.price_list_rate = new_rate
-            item.base_rate = new_rate
-            item.base_price_list_rate = new_rate
-            item.amount = new_rate * item.qty
-            item.base_amount = new_rate * item.qty
+        #     item_rates = item_price_doc[0] if item_price_doc else {}
+        #     original_rate = item_rates.get("price_list_rate") or 0
 
-            add_taxes_from_tax_template(item, invoice_doc)
+        #     new_rate = original_rate
+
+        #     item.rate = new_rate
+        #     item.price_list_rate = new_rate
+        #     item.base_rate = new_rate
+        #     item.base_price_list_rate = new_rate
+        #     item.amount = new_rate * item.qty
+        #     item.base_amount = new_rate * item.qty
 
         # add_taxes_from_tax_template(item, invoice_doc)
     # invoice_doc.calculate_taxes_and_totals()
@@ -798,7 +818,7 @@ def update_invoice(data):
         for tax in invoice_doc.taxes:
             if not (tax.charge_type == "Actual"):
                 new_taxes.append(tax)
-        frappe.log_error("new_taxes",new_taxes)
+        # frappe.log_error("new_taxes",new_taxes)
         invoice_doc.set("taxes", new_taxes)
         invoice_doc.shipping_rule = None  
 
@@ -889,119 +909,33 @@ def submit_invoice(invoice, data):
     #     invoice_doc.append("payments", {
     #     "amount": invoice_doc.rounded_total or invoice_doc.grand_total
     # })
-
-    # If the POS Profile is wholesale, set wholesale rate for each item
-    # discount_level = cint(frappe.get_value("Customer", invoice_doc.customer, "custom_discount_level") or 0)
+    
     customer = frappe.get_doc("Customer", invoice_doc.customer)
     customer_group = customer.get("customer_group") or ""
-    # profile_type = frappe.get_value("POS Profile", invoice_doc.pos_profile, "custom_profile_type")
-    wholesale_price_list = frappe.get_value("POS Profile", invoice_doc.pos_profile, "selling_price_list")
-
+    price_list = frappe.get_value("POS Profile", invoice_doc.pos_profile, "selling_price_list")
+    
     for item in invoice_doc.items:
-        # Fetch wholesale rates from Item Price
-        item_price_doc = frappe.get_all("Item Price",
-            filters={
-                "item_code": item.item_code,
-                "price_list": wholesale_price_list
+        rate = get_price_list_rate_for(
+            {
+                "price_list": price_list,
+                "customer": invoice_doc.customer,
+                "transaction_date": invoice_doc.posting_date,
+                "uom": item.uom,
+                "qty": item.qty,
+                "conversion_factor": item.conversion_factor,
+                "stock_uom": item.stock_uom,
+                "price_list_uom_dependant": 0,
             },
-            # fields=["wholesale_rate", "wholesale_rate2", "wholesale_rate3", "price_list_rate"]
-            fields=["price_list_rate"]
-        )
+            item.item_code,
+        ) or 0
 
-        item_rates = item_price_doc[0] if item_price_doc else {}
-        # wholesale_rate = item_rates.get("wholesale_rate") or 0
-        # wholesale_rate2 = item_rates.get("wholesale_rate2") or 0
-        # wholesale_rate3 = item_rates.get("wholesale_rate3") or 0
-        original_rate = item_rates.get("price_list_rate") or 0
-
-
-        # Apply rate logic
-        new_rate = original_rate  # fallback
-        # if profile_type == "Wholesale Customer":
-        #     if discount_level == 1 and wholesale_rate:
-        #         new_rate = wholesale_rate
-        #     elif discount_level == 2 and wholesale_rate2:
-        #         new_rate = wholesale_rate2
-        # elif (
-        #     profile_type == "Distribution Eastern"
-        #     # and customer_group.strip() == "Retail customers center - عملاء تجزئة-مراكز"
-        #     and wholesale_rate3
-        # ):
-        #     new_rate = wholesale_rate3
-
-        # Set the chosen rate
-        item.rate = new_rate
-        item.price_list_rate = new_rate
-        item.base_rate = new_rate
-        item.base_price_list_rate = new_rate
-        item.amount = new_rate * item.qty
-        item.base_amount = new_rate * item.qty
-
+        item.rate = rate
+        item.price_list_rate = rate
+        item.base_rate = rate
+        item.base_price_list_rate = rate
+        item.amount = rate * item.qty
+        item.base_amount = rate * item.qty
         add_taxes_from_tax_template(item, invoice_doc)
-
-    # wholesale_profiles = [
-    #     "Wholesale POS",
-    #     "Wholesale - Western",
-    #     "Wholesale - Eastern",
-    #     "Wholesale - Central",
-    #     "Orange Station POS",
-    #     "Wholesale Central 2 POS",
-    # ]
-    # if invoice_doc.pos_profile in wholesale_profiles:
-    #     for item in invoice_doc.items:
-    #         # frappe.log_error("Wholesale Profile1", invoice_doc.pos_profile)
-    #         # Get customer's custom discount level
-    #         discount_level = frappe.get_value("Customer", invoice_doc.customer, "custom_discount_level") or 0
-
-    #         # Get price list and field to use
-    #         wholesale_price_list = frappe.get_value("POS Profile", invoice_doc.pos_profile, "selling_price_list")
-
-    #         # Decide rate field based on level
-    #         rate_field = "wholesale_rate"  # default
-    #         if discount_level == 2:
-    #             rate_field = "wholesale_rate2"
-
-    #         # Fetch the correct rate
-    #         wholesale_rate = frappe.get_value(
-    #             "Item Price",
-    #             {
-    #                 "item_code": item.item_code,
-    #                 "price_list": wholesale_price_list,
-    #             },
-    #             rate_field,
-    #         ) or 0
-    #         # frappe.log_error("Wholesale Rate for item", wholesale_rate)
-
-    #         # Assign rate fields
-    #         item.rate = wholesale_rate
-    #         item.price_list_rate = wholesale_rate
-    #         item.base_rate = wholesale_rate
-    #         item.base_price_list_rate = wholesale_rate
-    #         item.amount = item.rate * item.qty
-    #         item.base_amount = item.base_rate * item.qty
-    #         # frappe.log_error("Wholesale Rate for item", item.rate)
-
-    #     add_taxes_from_tax_template(item, invoice_doc)
-        # wholesale_price_list = frappe.get_value("POS Profile", invoice_doc.pos_profile, "selling_price_list")
-        # rate_field = frappe.get_value("POS Profile", invoice_doc.pos_profile, "custom_wholesale_rate") or "wholesale_rate"
-        # # frappe.log_error("Wholesale Price List", wholesale_price_list)
-        # for item in invoice_doc.items:
-        #     wholesale_rate = frappe.get_value(
-        #         "Item Price",
-        #         {
-        #             "item_code": item.item_code,
-        #             "price_list": wholesale_price_list,
-        #         },
-        #         rate_field,
-        #     ) or 0
-        #     item.rate = wholesale_rate
-        #     # frappe.log_error("Wholesale Rate", wholesale_rate)
-        #     item.price_list_rate = wholesale_rate
-        #     item.base_rate = wholesale_rate
-        #     item.base_price_list_rate = wholesale_rate
-        #     item.amount = item.rate * item.qty
-        #     item.base_amount = item.base_rate * item.qty
-
 
     if invoice.get("posa_delivery_date"):
         invoice_doc.update_stock = 0
@@ -1512,6 +1446,7 @@ def get_items_details(pos_profile, items_data):
 @frappe.whitelist()
 def get_item_detail(item, doc=None, warehouse=None, price_list=None):
     item = json.loads(item)
+    item["selling_price_list"] = price_list
     today = nowdate()
     item_code = item.get("item_code")
     batch_no_data = []
@@ -1547,6 +1482,31 @@ def get_item_detail(item, doc=None, warehouse=None, price_list=None):
         res["actual_qty"] = get_stock_availability(item_code, warehouse)
     res["max_discount"] = max_discount
     res["batch_no_data"] = batch_no_data
+    
+    item_price = frappe.get_all(
+        "Item Price",
+        fields=["item_code", "price_list_rate", "currency"],
+        filters={"price_list": "Standard Selling", "item_code": item_code    },
+    )
+    item_price = frappe.get_all(
+        "Item Price",
+        filters={
+            "item_code": item_code,
+            "price_list": price_list,
+            "selling": 1,
+            "valid_upto": ["in", [None, "", today]],
+        },
+        or_filters=[
+            {"valid_from": ["<=", today]},
+            {"valid_from": ["is", "not set"]},
+        ],
+        fields=["price_list_rate", "currency", "valid_from", "valid_upto"],
+        order_by="valid_from desc, creation desc",
+        limit=1,
+    )
+
+    price_list_rate = item_price[0]["price_list_rate"] if item_price else 0
+    res["price_list_rate"]=price_list_rate
     return res
 
 
@@ -2043,84 +2003,167 @@ def get_customer_address(customer_name):
 #         data.append(frappe.get_doc("Sales Invoice", invoice["name"]))
 #     return data
 
+# @frappe.whitelist()
+# def search_invoices_for_return(invoice_name, company):
+#     invoices_list = frappe.get_list(
+#         "Sales Invoice",
+#         filters={
+#             "name": ["like", f"%{invoice_name}%"],
+#             "company": company,
+#             "docstatus": 1,
+#             "is_return": 0,
+#         },
+#         fields=["name"],
+#         limit_page_length=0,
+#         order_by="customer",
+#     )
+#     data = []
+
+#     for invoice in invoices_list:
+#         doc = frappe.get_doc("Sales Invoice", invoice.name)
+#         valid_items = []
+
+#         for item in doc.items:
+#             original_qty = item.qty
+#             # returned_qty = sum(
+#             #     abs(r.qty)
+#                 # for r in frappe.get_all(
+#                 #     "Sales Invoice Item",
+#                 #     filters={
+#                 #         "docstatus": 1,
+#                 #         "return_against": doc.name,
+#                 #         "item_code": item.item_code,
+#                 #         "parenttype": "Sales Invoice"
+#                 #     },
+#                 #     fields=["qty"]
+#                 # )
+#             return_invoices = frappe.get_all(
+#                 "Sales Invoice",
+#                 filters={
+#                     "return_against": doc.name,
+#                     "docstatus": 1,
+#                     "is_return": 1
+#                 },
+#                 pluck="name"
+#             )
+
+#             returned_qty = 0
+#             if return_invoices:
+#                 returned_items = frappe.get_all(
+#                     "Sales Invoice Item",
+#                     filters={
+#                         "parent": ["in", return_invoices],
+#                         "item_code": item.item_code
+#                     },
+#                     fields=["qty"]
+#                 )
+#                 returned_qty = sum(abs(r.qty) for r in returned_items)
+
+#             # )
+
+#             # If there's remaining quantity to return
+#             if abs(returned_qty) < abs(original_qty):
+#                 # Add only the returnable quantity
+#                 remaining_qty = original_qty - returned_qty
+#                 item.qty = remaining_qty
+#                 item.amount = item.rate * remaining_qty
+#                 item.stock_qty = item.stock_qty * (remaining_qty / original_qty) if item.stock_qty else 0
+#                 valid_items.append(item)
+
+#         if valid_items:
+#             doc.items = valid_items
+#             data.append(doc)
+
+#     return data
+
 @frappe.whitelist()
 def search_invoices_for_return(invoice_name, company):
-    # frappe.log_error("1", invoice_name)
-    invoices_list = frappe.get_list(
+    from frappe.utils import add_days, nowdate, flt
+
+    from_date = add_days(nowdate(), -15)
+
+    invoices = frappe.get_list(
         "Sales Invoice",
         filters={
             "name": ["like", f"%{invoice_name}%"],
             "company": company,
             "docstatus": 1,
             "is_return": 0,
+            "posting_date": [">=", from_date],
         },
-        fields=["name"],
-        limit_page_length=0,
-        order_by="customer",
+        fields=[
+            "name",
+            "customer",
+            "posting_date",
+            "grand_total",
+            "currency"
+        ],
+        order_by="posting_date desc",
+        limit_page_length=50
     )
-    # frappe.log_error("2", invoice_name)
-    data = []
 
-    for invoice in invoices_list:
-        doc = frappe.get_doc("Sales Invoice", invoice.name)
-        valid_items = []
+    result = []
 
-        for item in doc.items:
-            # Total qty in original invoice
-            original_qty = item.qty
+    for inv in invoices:
+        doc = frappe.get_doc("Sales Invoice", inv.name)
 
-            # Total already returned qty for this item (negative qtys)
-            # returned_qty = sum(
-            #     abs(r.qty)
-                # for r in frappe.get_all(
-                #     "Sales Invoice Item",
-                #     filters={
-                #         "docstatus": 1,
-                #         "return_against": doc.name,
-                #         "item_code": item.item_code,
-                #         "parenttype": "Sales Invoice"
-                #     },
-                #     fields=["qty"]
-                # )
-            return_invoices = frappe.get_all(
-                "Sales Invoice",
-                filters={
-                    "return_against": doc.name,
-                    "docstatus": 1,
-                    "is_return": 1
-                },
-                pluck="name"
+        # 🔹 Get all return invoices once
+        return_invoices = frappe.get_all(
+            "Sales Invoice",
+            filters={
+                "return_against": doc.name,
+                "docstatus": 1,
+                "is_return": 1
+            },
+            pluck="name"
+        )
+
+        returned_map = {}
+
+        if return_invoices:
+            returned_items = frappe.get_all(
+                "Sales Invoice Item",
+                filters={"parent": ["in", return_invoices]},
+                fields=["item_code", "qty"]
             )
 
-            returned_qty = 0
-            if return_invoices:
-                returned_items = frappe.get_all(
-                    "Sales Invoice Item",
-                    filters={
-                        "parent": ["in", return_invoices],
-                        "item_code": item.item_code
-                    },
-                    fields=["qty"]
-                )
-                returned_qty = sum(abs(r.qty) for r in returned_items)
+            for r in returned_items:
+                returned_map[r.item_code] = returned_map.get(r.item_code, 0) + abs(r.qty)
 
-            # )
+        items = []
 
-            # If there's remaining quantity to return
-            if abs(returned_qty) < abs(original_qty):
-                # Add only the returnable quantity
+        for item in doc.items:
+            original_qty = abs(item.qty)
+            returned_qty = returned_map.get(item.item_code, 0)
+
+            if returned_qty < original_qty:
                 remaining_qty = original_qty - returned_qty
-                item.qty = remaining_qty
-                item.amount = item.rate * remaining_qty
-                item.stock_qty = item.stock_qty * (remaining_qty / original_qty) if item.stock_qty else 0
-                valid_items.append(item)
 
-        if valid_items:
-            doc.items = valid_items
-            data.append(doc)
+                items.append({
+                    "item_code": item.item_code,
+                    "item_name": item.item_name,
+                    "rate": item.rate,
+                    "qty": remaining_qty,
+                    "amount": flt(item.rate) * remaining_qty,
+                    "stock_qty": (
+                        item.stock_qty * (remaining_qty / original_qty)
+                        if item.stock_qty else 0
+                    ),
+                    "uom": item.uom,
+                    "conversion_factor": item.conversion_factor
+                })
 
-    return data
+        if items:
+            result.append({
+                "name": inv.name,
+                "customer": inv.customer,
+                "posting_date": inv.posting_date,
+                "grand_total": inv.grand_total,
+                "currency": inv.currency,
+                "items": items
+            })
 
+    return result
 
 
 @frappe.whitelist()
